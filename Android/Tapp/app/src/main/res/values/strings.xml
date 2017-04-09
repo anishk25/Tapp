@@ -1,3 +1,10 @@
 <resources>
     <string name="app_name">Tapp</string>
+    <string name="action_settings">Settings</string>
+    <string name="section_format">Hello World from section: %1$d</string>
+    <string name="qr_code_section">QR Code</string>
+    <string name="scan_section">Scan</string>
+    <string name="recently_added">Recent Tapps</string>
+    <string name ="facebook_login_text">Log in with Facebook</string>
+    <string name ="facebook_logout_text">Log Out</string>
 </resources>

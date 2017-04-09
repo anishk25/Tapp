@@ -1,4 +1,4 @@
-package app.com.anish.tapp;
+package app.anish.com.tapp;
 
 import org.junit.Test;
 
