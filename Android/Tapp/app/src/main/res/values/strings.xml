@@ -7,4 +7,5 @@
     <string name="recently_added">Recent Tapps</string>
     <string name ="facebook_login_text">Log in with Facebook</string>
     <string name ="facebook_logout_text">Log Out</string>
+    <string name="facebook_app_id">661823474026053</string>
 </resources>
