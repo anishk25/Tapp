@@ -1,9 +1,8 @@
-package app.anish.com.tapp;
+package app.anish.com.tapp.camera;
 
 import android.content.Context;
 import android.hardware.Camera;
 import android.hardware.Camera.PreviewCallback;
-import android.hardware.camera2.CameraDevice;
 import android.util.Log;
 import android.view.SurfaceHolder;
 import android.view.SurfaceView;

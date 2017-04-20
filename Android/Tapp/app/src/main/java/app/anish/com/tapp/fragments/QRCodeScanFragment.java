@@ -17,8 +17,9 @@ import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.FrameLayout;
 
-import app.anish.com.tapp.CameraPreview;
+import app.anish.com.tapp.camera.CameraPreview;
 import app.anish.com.tapp.R;
+import app.anish.com.tapp.camera.CameraScanProcessor;
 
 /**
  * Created by akhattar on 4/11/17.
@@ -33,19 +34,20 @@ public class QRCodeScanFragment extends Fragment {
     private final PreviewCallback previewCallback = new PreviewCallback() {
         @Override
         public void onPreviewFrame(byte[] bytes, Camera camera) {
-            // do something here
+            cameraScanProcessor.processCameraDataAndOpenContactsDialog(bytes);
         }
     };
 
     private Camera mCamera;
     private CameraPreview mCameraPreview;
     private Button reqCamPermButton;
+    private CameraScanProcessor cameraScanProcessor;
 
     @Nullable
     @Override
     public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
         View rootView = inflater.inflate(R.layout.qr_code_scan, container, false);
-        reqCamPermButton = (Button) rootView.findViewById(R.id.bReqCameraPerm);
+        initReqPermButton(rootView);
         checkForPermissionAndInitCamera();
         initCameraUI(rootView);
         return rootView;
@@ -54,6 +56,7 @@ public class QRCodeScanFragment extends Fragment {
     private void initializeCamera() {
         mCamera = getCameraInstance();
         if (mCamera != null) {
+            cameraScanProcessor = new CameraScanProcessor(mCamera, getContext());
             mCameraPreview = new CameraPreview(getContext(), mCamera, previewCallback);
             reqCamPermButton.setVisibility(View.GONE);
             reqCamPermButton.setEnabled(false);
@@ -87,7 +90,6 @@ public class QRCodeScanFragment extends Fragment {
         }
     }
 
-
     private void checkForPermissionAndInitCamera() {
         if (ContextCompat.checkSelfPermission(getContext(), Manifest.permission.CAMERA) != PackageManager.PERMISSION_GRANTED) {
             ActivityCompat.requestPermissions(getActivity(), new String[]{Manifest.permission.CAMERA}, MY_PERMISSIONS_REQUEST_FOR_CAMERA);
@@ -95,7 +97,6 @@ public class QRCodeScanFragment extends Fragment {
             initializeCamera();
         }
     }
-
 
     @Override
     public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
