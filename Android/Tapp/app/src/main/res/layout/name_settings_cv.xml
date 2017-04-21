@@ -5,6 +5,7 @@
     android:layout_width="match_parent"
     android:layout_height="@dimen/settings_card_view_height"
     card_view:cardBackgroundColor="#cdd7d8"
+    android:id="@+id/cvName"
     >
 
 
@@ -12,27 +13,35 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent">
 
-
         <LinearLayout
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_alignParentRight="true"
-            android:layout_alignParentEnd="true"
+            android:orientation="vertical"
             android:layout_centerVertical="true"
-            android:orientation="vertical">
+            android:layout_alignParentStart="true"
+            android:layout_alignParentLeft="true"
+            android:paddingStart="4dp"
+            android:paddingLeft="4dp"
+            >
 
             <TextView
                 android:layout_width="wrap_content"
-                android:layout_height="wrap_content" />
-            <CheckBox
-                android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:id="@+id/contactCheckBox"
+                android:text="@string/settings_contact_name_disp"
+                android:textStyle="bold"
+                android:textSize="16sp"
+                android:textColor="#000000"
                 />
 
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:textColor="#000000"
+                android:text="@string/settings_default_name"
+                android:id="@+id/tvSettingName"
+                android:layout_marginTop="10dp"
+                />
         </LinearLayout>
-
-
 
     </RelativeLayout>
 
