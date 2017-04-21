@@ -53,6 +53,32 @@ public class QRCodeScanFragment extends Fragment {
         return rootView;
     }
 
+    @Override
+    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
+        switch (requestCode) {
+            case MY_PERMISSIONS_REQUEST_FOR_CAMERA:
+                if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                    // Camera Permission granted
+                    initializeCamera();
+                } else {
+                    reqCamPermButton.setVisibility(View.VISIBLE);
+                    reqCamPermButton.setEnabled(true);
+                }
+        }
+    }
+
+    @Override
+    public void setUserVisibleHint(boolean isVisibleToUser) {
+        super.setUserVisibleHint(isVisibleToUser);
+        if (mCamera != null) {
+            if (isVisibleToUser) {
+                mCamera.startPreview();
+            } else {
+                mCamera.stopPreview();
+            }
+        }
+    }
+
     private void initializeCamera() {
         mCamera = getCameraInstance();
         if (mCamera != null) {
@@ -95,20 +121,6 @@ public class QRCodeScanFragment extends Fragment {
             ActivityCompat.requestPermissions(getActivity(), new String[]{Manifest.permission.CAMERA}, MY_PERMISSIONS_REQUEST_FOR_CAMERA);
         } else {
             initializeCamera();
-        }
-    }
-
-    @Override
-    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
-        switch (requestCode) {
-            case MY_PERMISSIONS_REQUEST_FOR_CAMERA:
-                if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-                    // Camera Permission granted
-                    initializeCamera();
-                } else {
-                    reqCamPermButton.setVisibility(View.VISIBLE);
-                    reqCamPermButton.setEnabled(true);
-                }
         }
     }
 }

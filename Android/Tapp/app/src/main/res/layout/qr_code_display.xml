@@ -38,24 +38,24 @@
 
     </LinearLayout>
 
-
-    <com.facebook.login.widget.LoginButton
-        android:id="@+id/_fb_login"
-        android:layout_width="wrap_content"
+    <FrameLayout
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_gravity="center_horizontal"
-        android:layout_weight="12.5"
-        facebook:com_facebook_login_text="@string/facebook_login_text"
-        facebook:com_facebook_logout_text = "@string/facebook_logout_text"
-        />
+        android:layout_weight="25"
+        >
 
-    <ImageButton
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:src="@drawable/linkedin_login"
-        android:layout_gravity="center_horizontal"
-        android:background="#00000000"
-        android:layout_weight="12.5"
-        />
+        <Button
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/settings_button_text"
+            android:textColor="#ffffff"
+            android:background="@drawable/settings_button_background"
+            android:layout_gravity="center"
+            android:paddingRight="10dp"
+            android:paddingLeft="10dp"
+            />
+    </FrameLayout>
+
+
 
 </LinearLayout>

@@ -9,4 +9,5 @@
     <string name="facebook_logout_text">Log Out</string>
     <string name="facebook_app_id">661823474026053</string>
     <string name="camera_perm_button_text">Grant Camera Permission</string>
+    <string name="settings_button_text">QR Code Settings</string>
 </resources>
