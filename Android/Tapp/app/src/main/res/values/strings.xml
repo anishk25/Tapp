@@ -14,8 +14,7 @@
     <string name="settings_contact_name_disp">Name</string>
     <string name="settings_contact_number_disp">Phone Number</string>
     <string name="settings_contact_email_disp">Email</string>
-    <string name="settings_default_name">Joe Johnson</string>
-    <string name="setting_default_number">123&#8211;456&#8211;7890</string>
-    <string name="settings_default_email">joe.johnson@android.com</string>
+    <string name ="settings_title_text">Title</string>
+    <string name ="settings_detail_text">Details</string>
 
 </resources>
