@@ -2,24 +2,21 @@ package app.anish.com.tapp.data;
 
 import android.content.Context;
 
+import app.anish.com.tapp.R;
+
 /**
  * Created by anish_khattar25 on 4/23/17.
  */
 
-public class PhoneNumberSettingsDialogFactory extends TextSettingsDialogFactory {
+public class PhoneNumberSettingsDialogFactory extends SingleEditTextSettingsDialogFactory {
 
     @Override
-    protected void saveChanges(String data, Context context) {
-
+    protected String getTitle() {
+        return "Phone Number";
     }
 
     @Override
-    protected String getTextData(Context context) {
-        return null;
-    }
-
-    @Override
-    protected String getTitle(Context context) {
-        return null;
+    protected SharedPrefsKey getKey() {
+        return SharedPrefsKey.PHONE_NUMBER;
     }
 }

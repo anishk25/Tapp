@@ -17,7 +17,9 @@
     <string name ="settings_title_text">Title</string>
     <string name ="settings_detail_text">Details</string>
     <string name ="settings_edit_text_hint">Info here</string>
+
     <string name ="dialog_save">Save</string>
     <string name ="dialog_cancel">Cancel</string>
+    <string name ="dialog_ok">OK</string>
 
 </resources>

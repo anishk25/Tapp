@@ -8,6 +8,6 @@ import android.content.Context;
  * Created by anish_khattar25 on 4/23/17.
  */
 
-public interface SettingsDialogFactory {
+public interface DialogFactory {
     Dialog getDialog(Context activityContext);
 }

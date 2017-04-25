@@ -13,10 +13,10 @@ public class SettingsDataModel {
     private final String title;
     private final String details;
     private final boolean isEnabled;
-    private final SettingsDialogFactory dialogFactory;
+    private final DialogFactory dialogFactory;
 
 
-    public SettingsDataModel(String title, String details, boolean isEnabled, SettingsDialogFactory dialogFactory) {
+    public SettingsDataModel(String title, String details, boolean isEnabled, DialogFactory dialogFactory) {
         this.title = title;
         this.details = details;
         this.isEnabled = isEnabled;
@@ -39,7 +39,7 @@ public class SettingsDataModel {
         return isEnabled;
     }
 
-    public SettingsDialogFactory getDialogFactory() {
+    public DialogFactory getDialogFactory() {
         return dialogFactory;
     }
 }
