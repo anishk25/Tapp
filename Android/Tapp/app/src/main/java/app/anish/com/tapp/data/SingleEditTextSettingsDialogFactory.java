@@ -17,8 +17,6 @@ public abstract class SingleEditTextSettingsDialogFactory extends BinarySettings
 
     @Override
     protected void initUI(View rootView, Context context) {
-        TextView tvTitle = (TextView) rootView.findViewById(R.id.tvSettingsDialogTitle);
-        tvTitle.setText(getTitle());
         EditText editText = (EditText) rootView.findViewById(R.id.etSettingsDialogValue);
         String savedData = SharedPrefsUtils.getString(context, SETTINGS_SHARED_PREFS_KEY, getKey().toString());
         if (!StringUtils.stringIsEmpty(savedData)) {
