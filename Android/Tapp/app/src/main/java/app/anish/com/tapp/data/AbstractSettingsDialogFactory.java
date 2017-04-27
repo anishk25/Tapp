@@ -13,5 +13,4 @@ public abstract class AbstractSettingsDialogFactory implements DialogFactory {
 
     protected abstract String getTitle();
     protected abstract int getLayoutId();
-    protected abstract void initUI(View rootView, Context context);
 }

@@ -57,36 +57,20 @@
     </FrameLayout> -->
 
 
-    <LinearLayout
-        android:layout_width="wrap_content"
+
+    <FrameLayout
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_weight="25"
-        android:orientation="vertical"
-        android:layout_gravity="center_horizontal"
         >
-
-
-        <com.facebook.login.widget.LoginButton
-            android:id="@+id/bFbLogin"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
+        <fragment
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:id="@+id/fragFacebook"
+            android:name="app.anish.com.tapp.fragments.FacebookFragment"
             android:layout_gravity="center_horizontal"
-            facebook:com_facebook_login_text="@string/facebook_login_text"
-            facebook:com_facebook_logout_text = "@string/facebook_logout_text"
             />
-
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="10dp"
-            android:textColor="#000000"
-            android:text="Facebook Info Here"
-            android:id="@+id/tvFbInfo"
-            android:textSize="20sp"
-            />
-
-
-    </LinearLayout>
+    </FrameLayout>
 
 
 

@@ -29,7 +29,8 @@ import app.anish.com.tapp.camera.CameraScanProcessor;
 public class QRCodeScanFragment extends Fragment {
 
     private static final String TAG = QRCodeScanFragment.class.getSimpleName();
-    private static final int MY_PERMISSIONS_REQUEST_FOR_CAMERA = 1;
+    private static final int PERMISSIONS_REQUEST_FOR_CAMERA_INIT = 1;
+    private static final int PERMISSIONS_REQUEST_FOR_CAMERA_BUTTON = 2;
 
     private final PreviewCallback previewCallback = new PreviewCallback() {
         @Override
@@ -42,39 +43,52 @@ public class QRCodeScanFragment extends Fragment {
     private CameraPreview mCameraPreview;
     private Button reqCamPermButton;
     private CameraScanProcessor cameraScanProcessor;
+    private View rootView;
 
     @Nullable
     @Override
     public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
-        View rootView = inflater.inflate(R.layout.qr_code_scan, container, false);
-        initReqPermButton(rootView);
-        checkForPermissionAndInitCamera();
-        initCameraUI(rootView);
+        rootView = inflater.inflate(R.layout.qr_code_scan, container, false);
+        initReqPermButton();
+        checkForPermissionCameraPermission(PERMISSIONS_REQUEST_FOR_CAMERA_INIT);
         return rootView;
     }
 
     @Override
     public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
         switch (requestCode) {
-            case MY_PERMISSIONS_REQUEST_FOR_CAMERA:
-                if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-                    // Camera Permission granted
-                    initializeCamera();
-                } else {
-                    reqCamPermButton.setVisibility(View.VISIBLE);
-                    reqCamPermButton.setEnabled(true);
-                }
+            case PERMISSIONS_REQUEST_FOR_CAMERA_INIT:
+                enableReqPermButton(grantResults, false);
+                break;
+            case PERMISSIONS_REQUEST_FOR_CAMERA_BUTTON:
+                enableReqPermButton(grantResults, true);
+                break;
         }
     }
 
     @Override
     public void setUserVisibleHint(boolean isVisibleToUser) {
         super.setUserVisibleHint(isVisibleToUser);
-        if (mCamera != null) {
-            if (isVisibleToUser) {
+        if (isVisibleToUser) {
+            if (mCamera == null) {
+                initializeCamera();
                 mCamera.startPreview();
             } else {
+                mCamera.startPreview();
+            }
+        } else {
+            if (mCamera != null) {
                 mCamera.stopPreview();
+            }
+        }
+    }
+
+    private void enableReqPermButton(int [] permGrantResults, boolean enableCamera) {
+        if (!(permGrantResults.length > 0 && permGrantResults[0] == PackageManager.PERMISSION_GRANTED)) {
+            reqCamPermButton.setVisibility(View.VISIBLE);
+            reqCamPermButton.setEnabled(true);
+            if (enableCamera) {
+                initializeCamera();
             }
         }
     }
@@ -86,25 +100,20 @@ public class QRCodeScanFragment extends Fragment {
             mCameraPreview = new CameraPreview(getContext(), mCamera, previewCallback);
             reqCamPermButton.setVisibility(View.GONE);
             reqCamPermButton.setEnabled(false);
+            FrameLayout frameLayout = (FrameLayout) rootView.findViewById(R.id.flCamera);
+            frameLayout.addView(mCameraPreview);
         }
     }
 
-    private void initReqPermButton(View rootView) {
+    private void initReqPermButton() {
         reqCamPermButton = (Button) rootView.findViewById(R.id.bReqCameraPerm);
         reqCamPermButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                checkForPermissionAndInitCamera();
+                checkForPermissionCameraPermission(PERMISSIONS_REQUEST_FOR_CAMERA_BUTTON);
             }
         });
 
-    }
-
-    private void initCameraUI(View rootView) {
-        if (mCameraPreview != null) {
-            FrameLayout frameLayout = (FrameLayout) rootView.findViewById(R.id.flCamera);
-            frameLayout.addView(mCameraPreview);
-        }
     }
 
     private static Camera getCameraInstance() {
@@ -116,11 +125,9 @@ public class QRCodeScanFragment extends Fragment {
         }
     }
 
-    private void checkForPermissionAndInitCamera() {
+    private void checkForPermissionCameraPermission(int requestCode) {
         if (ContextCompat.checkSelfPermission(getContext(), Manifest.permission.CAMERA) != PackageManager.PERMISSION_GRANTED) {
-            ActivityCompat.requestPermissions(getActivity(), new String[]{Manifest.permission.CAMERA}, MY_PERMISSIONS_REQUEST_FOR_CAMERA);
-        } else {
-            initializeCamera();
+            ActivityCompat.requestPermissions(getActivity(), new String[]{Manifest.permission.CAMERA}, requestCode);
         }
     }
 }

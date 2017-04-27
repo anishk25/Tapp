@@ -10,11 +10,6 @@ import android.view.View;
 public class LinkedinSettingsDialogFactory extends LoginBasedSettingsDialogFactory {
 
     @Override
-    protected void saveData(Context context) {
-
-    }
-
-    @Override
     protected String getTitle() {
         return null;
     }
@@ -22,10 +17,5 @@ public class LinkedinSettingsDialogFactory extends LoginBasedSettingsDialogFacto
     @Override
     protected int getLayoutId() {
         return 0;
-    }
-
-    @Override
-    protected void initUI(View rootView, Context context) {
-
     }
 }

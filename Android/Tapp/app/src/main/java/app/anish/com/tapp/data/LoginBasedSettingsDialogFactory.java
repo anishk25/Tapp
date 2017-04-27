@@ -21,18 +21,15 @@ public abstract class LoginBasedSettingsDialogFactory extends AbstractSettingsDi
 
         LayoutInflater inflater = LayoutInflater.from(activityContext);
         final View view = inflater.inflate(getLayoutId(), null);
-        initUI(view, activityContext);
         dialogBuilder.setView(view)
                 .setTitle(getTitle())
                 .setPositiveButton(R.string.dialog_ok, new DialogInterface.OnClickListener() {
+                    
                     @Override
                     public void onClick(DialogInterface dialogInterface, int i) {
-                        saveData(activityContext);
+                        // do nothing
                     }
                 });
         return dialogBuilder.create();
     }
-
-
-    protected abstract void saveData(Context context);
 }

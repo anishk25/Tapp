@@ -42,4 +42,5 @@ public abstract class BinarySettingsDialogFactory extends AbstractSettingsDialog
     }
 
     protected abstract void saveData(View view, Context context);
+    protected abstract void initUI(View rootView, Context context);
 }
