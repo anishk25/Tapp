@@ -1,13 +1,6 @@
 package app.anish.com.tapp.data;
 
-import android.content.Context;
-import android.view.View;
-import android.widget.EditText;
-import android.widget.TextView;
-
-import app.anish.com.tapp.R;
-import app.anish.com.tapp.utils.SharedPrefsUtils;
-import app.anish.com.tapp.utils.StringUtils;
+import app.anish.com.tapp.shared_prefs.SharedPrefsKey;
 
 /**
  * Created by anish_khattar25 on 4/23/17.

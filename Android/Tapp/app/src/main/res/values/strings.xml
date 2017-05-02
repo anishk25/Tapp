@@ -21,5 +21,12 @@
     <string name ="dialog_save">Save</string>
     <string name ="dialog_cancel">Cancel</string>
     <string name ="dialog_ok">OK</string>
+    <string name = "facebook_progress_msg">Please Wait</string>
+    <string name = "login_success_message">Successfully logged in!</string>
+    <string name = "logout_success_message">Successfully logged out!</string>
+
+    <string name = "linkedin_login_text">Login with LinkedIn</string>
+    <string name = "linkedin_logout_text">Logout from LinkedIn</string>
+
 
 </resources>

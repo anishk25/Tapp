@@ -1,5 +1,6 @@
 package app.anish.com.tapp.fragments;
 
+import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
@@ -7,7 +8,7 @@ import android.support.v4.app.Fragment;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.TextView;
+import android.widget.Toast;
 
 import com.facebook.CallbackManager;
 import com.facebook.FacebookCallback;
@@ -18,73 +19,85 @@ import com.facebook.login.LoginResult;
 import com.facebook.login.widget.LoginButton;
 
 import app.anish.com.tapp.R;
+import app.anish.com.tapp.shared_prefs.SharedPrefsKey;
+import app.anish.com.tapp.shared_prefs.SharedPrefsUtils;
+import app.anish.com.tapp.utils.Constants;
 
 /**
  * Created by akhattar on 4/26/17.
  */
 
-public class FacebookFragment extends Fragment {
+public class FacebookDialogFragment extends Fragment {
 
 
     private CallbackManager mCallBackManager;
-    private ProfileTracker mProfileTracker;
+    private Context context;
 
+
+    @Override
+    public void onCreate(@Nullable Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        initProfileTracker();
+        context = getActivity().getApplicationContext();
+    }
 
     @Nullable
     @Override
     public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
         View rootView = inflater.inflate(R.layout.facebook_login, container, false);
-        initProfileTracker(rootView);
         initUI(rootView);
         return rootView;
     }
 
 
     private void initUI(View rootView) {
+        initFacebookButton(rootView);
+    }
+
+    private void initFacebookButton(View rootView) {
         mCallBackManager = CallbackManager.Factory.create();
         LoginButton loginButton = (LoginButton) rootView.findViewById(R.id.bFbLogin);
 
-        final TextView tvFbInfo = (TextView) rootView.findViewById(R.id.tvFbStatus);
-        if (Profile.getCurrentProfile() != null) {
-            tvFbInfo.setText(Profile.getCurrentProfile().getId());
-        }
-
         // read more on permissions here: https://developers.facebook.com/docs/facebook-login/permissions
-        //http://stackoverflow.com/questions/29642759/profile-getcurrentprofile-returns-null-after-logging-in-fb-api-v4-0
         loginButton.setReadPermissions("email", "public_profile", "user_about_me");
         loginButton.setFragment(this);
+        registerCallBackOnFbButton(loginButton);
+    }
 
+
+    private void registerCallBackOnFbButton(LoginButton loginButton) {
         loginButton.registerCallback(mCallBackManager, new FacebookCallback<LoginResult>() {
             @Override
             public void onSuccess(final LoginResult loginResult) {
-                if (Profile.getCurrentProfile() != null) {
-                    tvFbInfo.setText(Profile.getCurrentProfile().getId());
-                }
+                // do nothing for now
             }
 
             @Override
             public void onCancel() {
-
+                // do nothing for now
             }
 
             @Override
             public void onError(FacebookException error) {
-
+                Toast.makeText(context, "Error logging in: " + error.getMessage(), Toast.LENGTH_LONG);
             }
         });
     }
 
-    private void initProfileTracker(View rootView) {
-        final TextView tvFbInfo = (TextView) rootView.findViewById(R.id.tvFbStatus);
-        mProfileTracker = new ProfileTracker() {
+    private void initProfileTracker() {
+        ProfileTracker profileTracker = new ProfileTracker() {
             @Override
             protected void onCurrentProfileChanged(Profile oldProfile, Profile currentProfile) {
-                if(currentProfile != null) {
-                    // we just logged in
-                    tvFbInfo.setText("Facebook ID is " + currentProfile.getId());
+                int toastStringId;
+                if (currentProfile != null) {
+                    toastStringId = R.string.login_success_message;
+                    SharedPrefsUtils.saveString(context, Constants.SETTINGS_SHARED_PREFS_KEY, SharedPrefsKey.FACEBOOK_ID.toString(), currentProfile.getId());
                 } else {
-                    tvFbInfo.setText("Logged Out!");
+                    toastStringId = R.string.logout_success_message;
+                    SharedPrefsUtils.deleteKey(context, Constants.SETTINGS_SHARED_PREFS_KEY, SharedPrefsKey.FACEBOOK_ID.toString());
                 }
+                Toast.makeText(context, toastStringId, Toast.LENGTH_SHORT).show();
+                // SEND A LOCAL BROADCAST HERE using LocalBroadcastManager
             }
         };
     }
@@ -95,7 +108,5 @@ public class FacebookFragment extends Fragment {
         super.onActivityResult(requestCode, resultCode, data);
         mCallBackManager.onActivityResult(requestCode, resultCode, data);
     }
-
-
 
 }

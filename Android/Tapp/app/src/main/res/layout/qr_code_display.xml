@@ -38,7 +38,7 @@
 
     </LinearLayout>
 
-    <!--<FrameLayout
+    <FrameLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_weight="25"
@@ -54,27 +54,6 @@
             android:paddingRight="10dp"
             android:paddingLeft="10dp"
             />
-    </FrameLayout> -->
-
-
-
-    <FrameLayout
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_weight="25"
-        >
-        <fragment
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:id="@+id/fragFacebook"
-            android:name="app.anish.com.tapp.fragments.FacebookFragment"
-            android:layout_gravity="center_horizontal"
-            />
     </FrameLayout>
-
-
-
-
-
 
 </LinearLayout>

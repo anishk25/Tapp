@@ -1,4 +1,4 @@
-package app.anish.com.tapp.utils;
+package app.anish.com.tapp.shared_prefs;
 
 import android.content.Context;
 import android.content.SharedPreferences;
@@ -20,6 +20,14 @@ public final class SharedPrefsUtils {
         SharedPreferences sharedPref = context.getSharedPreferences(prefsKey, Context.MODE_PRIVATE);
         SharedPreferences.Editor editor = sharedPref.edit();
         editor.putString(valueKey, value);
+        editor.commit();
+    }
+
+
+    public static void deleteKey(Context context, String prefsKey, String valueKey) {
+        SharedPreferences sharedPref = context.getSharedPreferences(prefsKey, Context.MODE_PRIVATE);
+        SharedPreferences.Editor editor = sharedPref.edit();
+        editor.remove(valueKey);
         editor.commit();
     }
 }

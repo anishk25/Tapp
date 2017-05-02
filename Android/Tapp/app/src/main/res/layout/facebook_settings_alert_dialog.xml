@@ -10,7 +10,7 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:id="@+id/fragFacebook"
-        android:name="app.anish.com.tapp.fragments.FacebookFragment"
+        android:name="app.anish.com.tapp.fragments.FacebookDialogFragment"
         android:layout_gravity="center_horizontal"
         />
 

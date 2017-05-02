@@ -3,10 +3,11 @@ package app.anish.com.tapp.data;
 import android.content.Context;
 import android.view.View;
 import android.widget.EditText;
-import android.widget.TextView;
 
 import app.anish.com.tapp.R;
-import app.anish.com.tapp.utils.SharedPrefsUtils;
+import app.anish.com.tapp.shared_prefs.SharedPrefsKey;
+import app.anish.com.tapp.shared_prefs.SharedPrefsUtils;
+import app.anish.com.tapp.utils.Constants;
 import app.anish.com.tapp.utils.StringUtils;
 
 /**
@@ -18,7 +19,7 @@ public abstract class SingleEditTextSettingsDialogFactory extends BinarySettings
     @Override
     protected void initUI(View rootView, Context context) {
         EditText editText = (EditText) rootView.findViewById(R.id.etSettingsDialogValue);
-        String savedData = SharedPrefsUtils.getString(context, SETTINGS_SHARED_PREFS_KEY, getKey().toString());
+        String savedData = SharedPrefsUtils.getString(context, Constants.SETTINGS_SHARED_PREFS_KEY, getKey().toString());
         if (!StringUtils.stringIsEmpty(savedData)) {
             editText.setText(savedData);
         }
@@ -27,7 +28,7 @@ public abstract class SingleEditTextSettingsDialogFactory extends BinarySettings
     @Override
     protected void saveData(View rootView, Context context) {
         String data  = ((EditText) rootView.findViewById(R.id.etSettingsDialogValue)).getText().toString();
-        SharedPrefsUtils.saveString(context, SETTINGS_SHARED_PREFS_KEY, getKey().toString(), data);
+        SharedPrefsUtils.saveString(context, Constants.SETTINGS_SHARED_PREFS_KEY, getKey().toString(), data);
     }
 
     @Override

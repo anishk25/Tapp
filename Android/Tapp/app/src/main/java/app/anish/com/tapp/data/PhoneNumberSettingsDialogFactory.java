@@ -1,8 +1,6 @@
 package app.anish.com.tapp.data;
 
-import android.content.Context;
-
-import app.anish.com.tapp.R;
+import app.anish.com.tapp.shared_prefs.SharedPrefsKey;
 
 /**
  * Created by anish_khattar25 on 4/23/17.
