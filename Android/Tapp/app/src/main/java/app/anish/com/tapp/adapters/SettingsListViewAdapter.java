@@ -24,7 +24,7 @@ import app.anish.com.tapp.utils.SharedPrefsUtils;
  * Created by akhattar on 5/5/17.
  */
 
-public class SettingsListViewAdapter extends ArrayAdapter<SettingsInfo> implements View.OnClickListener {
+public class SettingsListViewAdapter extends ArrayAdapter<SettingsInfo> {
 
     public SettingsListViewAdapter(@NonNull ArrayList<SettingsInfo> data, Context context) {
         super(context, R.layout.cv_settings_base_content, data);
@@ -42,21 +42,17 @@ public class SettingsListViewAdapter extends ArrayAdapter<SettingsInfo> implemen
             LayoutInflater inflater = LayoutInflater.from(getContext());
             convertView = inflater.inflate(R.layout.cv_settings_base_content, parent, false);
             viewHolder = createViewHolder(convertView);
-            convertView.setTag(viewHolder);
+            convertView.setTag(R.integer.view_holder_tag, viewHolder);
             setupOnClickListenerForListItemView(convertView, viewHolder, settingsInfo);
             setupCheckboxListener(viewHolder.shareCheckBox, settingsInfo);
         } else {
-            viewHolder = (ViewHolder) convertView.getTag();
+            viewHolder = (ViewHolder) convertView.getTag(R.integer.view_holder_tag);
         }
 
         setDataForViewsInViewHolder(viewHolder, settingsInfo);
         return convertView;
     }
 
-    @Override
-    public void onClick(View v) {
-
-    }
 
     private ViewHolder createViewHolder(View rootView) {
         ViewHolder viewHolder = new ViewHolder();
@@ -82,8 +78,16 @@ public class SettingsListViewAdapter extends ArrayAdapter<SettingsInfo> implemen
         convertView.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                Dialog dialog = settingsInfo.getDialogFactory().getDialog(getContext());
-                setupDismissListenerOnDialog(dialog, viewHolder, settingsInfo);
+                Dialog dialog;
+
+                if (convertView.getTag(R.integer.dialog_tag) != null) {
+                    dialog = (Dialog) convertView.getTag(R.integer.dialog_tag);
+                } else {
+                    dialog = settingsInfo.getDialogFactory().getDialog(getContext());
+                    setupDismissListenerOnDialog(dialog, viewHolder, settingsInfo);
+                    convertView.setTag(R.integer.dialog_tag, dialog);
+                }
+
                 dialog.show();
             }
         });

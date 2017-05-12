@@ -1,6 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <integer name="linkedin_login_status">0</integer>
+    <integer name="view_holder_tag">1</integer>
+    <integer name="dialog_tag">2</integer>
 
 
 </resources>

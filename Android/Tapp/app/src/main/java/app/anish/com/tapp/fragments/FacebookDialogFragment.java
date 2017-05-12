@@ -57,16 +57,7 @@ public class FacebookDialogFragment extends Fragment {
         super.onActivityResult(requestCode, resultCode, data);
         mCallBackManager.onActivityResult(requestCode, resultCode, data);
     }
-
-    @Override
-    public void onDestroyView() {
-        FacebookDialogFragment fragment = ((FacebookDialogFragment) getFragmentManager().findFragmentById(R.id.fragFacebook));
-        FragmentTransaction ft = getActivity().getSupportFragmentManager().beginTransaction();
-        ft.remove(fragment);
-        ft.commit();
-        super.onDestroyView();
-    }
-
+    
     private void initUI(View rootView) {
         initFacebookButton(rootView);
     }

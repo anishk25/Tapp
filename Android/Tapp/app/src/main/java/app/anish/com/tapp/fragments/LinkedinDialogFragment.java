@@ -6,6 +6,7 @@ import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentTransaction;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -70,15 +71,6 @@ public class LinkedinDialogFragment extends Fragment {
         }
     }
 
-    @Override
-    public void onDestroyView() {
-        FacebookDialogFragment fragment = ((FacebookDialogFragment) getFragmentManager().findFragmentById(R.id.fragLinkedin));
-        FragmentTransaction ft = getActivity().getSupportFragmentManager().beginTransaction();
-        ft.remove(fragment);
-        ft.commit();
-        super.onDestroyView();
-    }
-
     private void initUIElements(View rootView) {
         loginButton = (Button) rootView.findViewById(R.id.bLinkedinButton);
         progressBar = (ProgressBar) rootView.findViewById(R.id.pbLinkedin);
@@ -140,6 +132,7 @@ public class LinkedinDialogFragment extends Fragment {
                 public void onAuthError(LIAuthError error) {
                     toggleProgressBar();
                     Toast.makeText(context, "Error logging into linkedin", Toast.LENGTH_LONG).show();
+                    Log.d("LINKEDIN ERROR", error.toString());
                 }
             }, true);
         }
