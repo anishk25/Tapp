@@ -12,6 +12,7 @@ import android.widget.ArrayAdapter;
 import android.widget.CheckBox;
 import android.widget.CompoundButton;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import java.util.ArrayList;
 
@@ -26,8 +27,11 @@ import app.anish.com.tapp.utils.SharedPrefsUtils;
 
 public class SettingsListViewAdapter extends ArrayAdapter<SettingsInfo> {
 
+    private Context mContext;
+
     public SettingsListViewAdapter(@NonNull ArrayList<SettingsInfo> data, Context context) {
         super(context, R.layout.cv_settings_base_content, data);
+        mContext = getContext();
     }
 
     @NonNull
@@ -39,7 +43,7 @@ public class SettingsListViewAdapter extends ArrayAdapter<SettingsInfo> {
         ViewHolder viewHolder;
 
         if (convertView == null) {
-            LayoutInflater inflater = LayoutInflater.from(getContext());
+            LayoutInflater inflater = LayoutInflater.from(mContext);
             convertView = inflater.inflate(R.layout.cv_settings_base_content, parent, false);
             viewHolder = createViewHolder(convertView);
             convertView.setTag(R.integer.view_holder_tag, viewHolder);
@@ -65,7 +69,7 @@ public class SettingsListViewAdapter extends ArrayAdapter<SettingsInfo> {
     private void setDataForViewsInViewHolder(ViewHolder viewHolder, SettingsInfo settingsInfo) {
         String title = settingsInfo.getTitle();
         String details = getDetailDispString(settingsInfo);
-        boolean share = SharedPrefsUtils.getBoolean(getContext(),
+        boolean share = SharedPrefsUtils.getBoolean(mContext,
                 Constants.SETTINGS_SHARED_PREFS_KEY, settingsInfo.getShareInfoPrefKey());
 
         viewHolder.tvTitle.setText(title);
@@ -83,7 +87,7 @@ public class SettingsListViewAdapter extends ArrayAdapter<SettingsInfo> {
                 if (convertView.getTag(R.integer.dialog_tag) != null) {
                     dialog = (Dialog) convertView.getTag(R.integer.dialog_tag);
                 } else {
-                    dialog = settingsInfo.getDialogFactory().getDialog(getContext());
+                    dialog = settingsInfo.getDialogFactory().getDialog(mContext);
                     setupDismissListenerOnDialog(dialog, viewHolder, settingsInfo);
                     convertView.setTag(R.integer.dialog_tag, dialog);
                 }
@@ -103,19 +107,25 @@ public class SettingsListViewAdapter extends ArrayAdapter<SettingsInfo> {
         });
     }
 
-    private void setupCheckboxListener(CheckBox checkBox, final SettingsInfo settingsInfo) {
+    private void setupCheckboxListener(final CheckBox checkBox, final SettingsInfo settingsInfo) {
         checkBox.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
             @Override
             public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
-                SharedPrefsUtils.saveBoolean(getContext(), Constants.SETTINGS_SHARED_PREFS_KEY,
-                        settingsInfo.getShareInfoPrefKey(), isChecked);
+                // check if data is present in shared pref
+                if(isChecked && SharedPrefsUtils.getString(mContext, Constants.SETTINGS_SHARED_PREFS_KEY, settingsInfo.getInfoPrefKey()) == null) {
+                    checkBox.setChecked(false);
+                    Toast.makeText(mContext, "Porperty must be set before enabling share", Toast.LENGTH_LONG).show();
+                } else {
+                    SharedPrefsUtils.saveBoolean(mContext, Constants.SETTINGS_SHARED_PREFS_KEY,
+                            settingsInfo.getShareInfoPrefKey(), isChecked);
+                }
             }
         });
     }
 
     private String getDetailDispString(SettingsInfo settingsInfo) {
         String prefix = settingsInfo.getInfoPrefix();
-        String details = SharedPrefsUtils.getString(getContext(), Constants.SETTINGS_SHARED_PREFS_KEY,
+        String details = SharedPrefsUtils.getString(mContext, Constants.SETTINGS_SHARED_PREFS_KEY,
                 settingsInfo.getInfoPrefKey());
         return details == null ? "Not Set" : prefix + details;
     }

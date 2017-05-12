@@ -27,7 +27,11 @@ public abstract class SingleEditTextSettingsDialogFactory extends BinarySettings
     @Override
     protected void saveData(View rootView, Context context) {
         String data  = ((EditText) rootView.findViewById(R.id.etSettingsDialogValue)).getText().toString();
-        SharedPrefsUtils.saveString(context, Constants.SETTINGS_SHARED_PREFS_KEY, getKey(), data);
+        if (StringUtils.stringIsEmpty(data)) {
+            SharedPrefsUtils.deleteKey(context, Constants.SETTINGS_SHARED_PREFS_KEY, getKey());
+        } else {
+            SharedPrefsUtils.saveString(context, Constants.SETTINGS_SHARED_PREFS_KEY, getKey(), data);
+        }
     }
 
     @Override

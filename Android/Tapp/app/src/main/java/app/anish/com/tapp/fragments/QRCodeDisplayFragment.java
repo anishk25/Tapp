@@ -133,7 +133,8 @@ public class QRCodeDisplayFragment extends Fragment implements View.OnClickListe
     }
 
     private void showPermNotGrantedToast() {
-        Toast.makeText(mActivity, "Read contacts permission not granted, contact info will not be automatically encoded in QR code. Go to settings to enter contact info", Toast.LENGTH_LONG);
+        Toast.makeText(mActivity, "Read contacts permission not granted, contact info will not be" +
+                " automatically encoded in QR code. Go to settings to enter contact info", Toast.LENGTH_LONG).show();
     }
 
     private boolean allPermissionsGranted(int [] grantResults) {
