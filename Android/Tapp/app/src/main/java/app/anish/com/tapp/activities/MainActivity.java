@@ -1,5 +1,7 @@
 package app.anish.com.tapp.activities;
 
+import android.content.Context;
+import android.content.SharedPreferences;
 import android.support.design.widget.TabLayout;
 import android.support.v7.app.AppCompatActivity;
 
@@ -12,23 +14,20 @@ import android.view.MenuItem;
 
 import app.anish.com.tapp.R;
 import app.anish.com.tapp.adapters.SectionsPagerAdapter;
+import app.anish.com.tapp.data.ContactInfo;
+import app.anish.com.tapp.utils.Constants;
+import app.anish.com.tapp.utils.SharedPrefsUtils;
 
 public class MainActivity extends AppCompatActivity {
 
-    /**
-     * The {@link android.support.v4.view.PagerAdapter} that will provide
-     * fragments for each of the sections. We use a
-     * {@link FragmentPagerAdapter} derivative, which will keep every
-     * loaded fragment in memory. If this becomes too memory intensive, it
-     * may be best to switch to a
-     * {@link android.support.v4.app.FragmentStatePagerAdapter}.
-     */
     private SectionsPagerAdapter mSectionsPagerAdapter;
 
     /**
      * The {@link ViewPager} that will host the section contents.
      */
     private ViewPager mViewPager;
+
+    private Context mContext;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -50,6 +49,8 @@ public class MainActivity extends AppCompatActivity {
 
         TabLayout tabLayout = (TabLayout) findViewById(R.id.tabs);
         tabLayout.setupWithViewPager(mViewPager);
+
+        mContext = getApplicationContext();
     }
 
 
@@ -74,8 +75,4 @@ public class MainActivity extends AppCompatActivity {
 
         return super.onOptionsItemSelected(item);
     }
-
-
-
-
 }

@@ -7,12 +7,7 @@ import android.database.Cursor;
 import android.provider.ContactsContract;
 import android.telephony.TelephonyManager;
 import android.util.Patterns;
-
 import java.util.regex.Pattern;
-
-import app.anish.com.tapp.exceptions.EmailNotFoundException;
-import app.anish.com.tapp.exceptions.OwnerNameNotFoundException;
-import app.anish.com.tapp.exceptions.PhoneNumberNotFoundException;
 import app.anish.com.tapp.utils.StringUtils;
 
 /**
@@ -26,30 +21,30 @@ public final class ContactInfo {
     private static final String[] SELF_PROJECTION = new String[] {ContactsContract.CommonDataKinds.Phone._ID, ContactsContract.CommonDataKinds.Phone.DISPLAY_NAME};
     private static final int OWNER_NAME_CURSOR_INDEX = 1;
 
-    public static String getCurrentPhoneNumber(Context context) throws PhoneNumberNotFoundException {
+
+    public static String getCurrentPhoneNumber(Context context) {
         TelephonyManager tMgr = (TelephonyManager) context.getSystemService(Context.TELEPHONY_SERVICE);
         String phoneNumber = tMgr.getLine1Number();
         if (StringUtils.stringIsEmpty(phoneNumber)) {
-            throw new PhoneNumberNotFoundException("No phone number found");
+            return null;
         }
         return phoneNumber;
     }
 
-    public static String getOwnerName(Context context) throws OwnerNameNotFoundException{
+    public static String getOwnerName(Context context) {
         Cursor cursor = context.getContentResolver().query(ContactsContract.Profile.CONTENT_URI, SELF_PROJECTION, null, null, null);
         cursor.moveToFirst();
 
         String ownerName =  cursor.getString(OWNER_NAME_CURSOR_INDEX);
 
         if (StringUtils.stringIsEmpty(ownerName)) {
-            throw new OwnerNameNotFoundException("Owner name not found");
+            return null;
         }
 
         return ownerName;
     }
 
-
-    public static String getOwnerEmail(Context context) throws EmailNotFoundException{
+    public static String getOwnerEmail(Context context) {
         Pattern emailPattern = Patterns.EMAIL_ADDRESS;
         Account[] accounts = AccountManager.get(context).getAccounts();
 
@@ -58,8 +53,7 @@ public final class ContactInfo {
                 return account.name;
             }
         }
-
-        throw new EmailNotFoundException("User email not found!");
+        return null;
     }
 
 }

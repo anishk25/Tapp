@@ -57,7 +57,7 @@ public class FacebookDialogFragment extends Fragment {
         super.onActivityResult(requestCode, resultCode, data);
         mCallBackManager.onActivityResult(requestCode, resultCode, data);
     }
-    
+
     private void initUI(View rootView) {
         initFacebookButton(rootView);
     }
@@ -122,5 +122,4 @@ public class FacebookDialogFragment extends Fragment {
         SharedPrefsUtils.deleteKey(context, Constants.SETTINGS_SHARED_PREFS_KEY, SettingsInfo.FACEBOOK_NAME.toString());
         SharedPrefsUtils.deleteKey(context, Constants.SETTINGS_SHARED_PREFS_KEY, SecuredSharedPrefs.FACEBOOK_ID.toString());
     }
-
 }
