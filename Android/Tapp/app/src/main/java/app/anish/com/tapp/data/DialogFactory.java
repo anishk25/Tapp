@@ -1,5 +1,6 @@
 package app.anish.com.tapp.data;
 
+import android.app.Activity;
 import android.app.Dialog;
 import android.content.Context;
 
@@ -9,5 +10,5 @@ import android.content.Context;
  */
 
 public interface DialogFactory {
-    Dialog getDialog(Context activityContext);
+    Dialog getDialog(Context context);
 }

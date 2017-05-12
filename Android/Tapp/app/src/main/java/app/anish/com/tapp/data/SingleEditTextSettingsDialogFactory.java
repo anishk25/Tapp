@@ -5,8 +5,7 @@ import android.view.View;
 import android.widget.EditText;
 
 import app.anish.com.tapp.R;
-import app.anish.com.tapp.shared_prefs.SharedPrefsKey;
-import app.anish.com.tapp.shared_prefs.SharedPrefsUtils;
+import app.anish.com.tapp.utils.SharedPrefsUtils;
 import app.anish.com.tapp.utils.Constants;
 import app.anish.com.tapp.utils.StringUtils;
 
@@ -28,7 +27,7 @@ public abstract class SingleEditTextSettingsDialogFactory extends BinarySettings
     @Override
     protected void saveData(View rootView, Context context) {
         String data  = ((EditText) rootView.findViewById(R.id.etSettingsDialogValue)).getText().toString();
-        SharedPrefsUtils.saveString(context, Constants.SETTINGS_SHARED_PREFS_KEY, getKey().toString(), data);
+        SharedPrefsUtils.saveString(context, Constants.SETTINGS_SHARED_PREFS_KEY, getKey(), data);
     }
 
     @Override
@@ -36,5 +35,5 @@ public abstract class SingleEditTextSettingsDialogFactory extends BinarySettings
         return R.layout.settings_alertdialog_edittext;
     }
 
-    protected abstract SharedPrefsKey getKey();
+    protected abstract String getKey();
 }

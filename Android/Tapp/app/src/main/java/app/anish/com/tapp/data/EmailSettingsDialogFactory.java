@@ -1,6 +1,6 @@
 package app.anish.com.tapp.data;
 
-import app.anish.com.tapp.shared_prefs.SharedPrefsKey;
+import app.anish.com.tapp.shared_prefs.SettingsInfo;
 
 /**
  * Created by anish_khattar25 on 4/23/17.
@@ -8,15 +8,13 @@ import app.anish.com.tapp.shared_prefs.SharedPrefsKey;
 
 public class EmailSettingsDialogFactory extends SingleEditTextSettingsDialogFactory {
 
-    private static final String EMAIL_KEY = "EMAIL";
-
     @Override
     protected String getTitle() {
-        return "Email";
+        return SettingsInfo.EMAIL.getTitle();
     }
 
     @Override
-    protected SharedPrefsKey getKey() {
-        return SharedPrefsKey.EMAIL;
+    protected String getKey() {
+        return SettingsInfo.EMAIL.getInfoPrefKey();
     }
 }

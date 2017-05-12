@@ -1,5 +1,6 @@
 package app.anish.com.tapp.data;
 
+import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.Dialog;
 import android.content.Context;
@@ -16,19 +17,19 @@ import app.anish.com.tapp.R;
 public abstract class BinarySettingsDialogFactory extends AbstractSettingsDialogFactory {
 
     @Override
-    public Dialog getDialog(final Context activityContext) {
-        AlertDialog.Builder dialogBuilder = new AlertDialog.Builder(activityContext);
+    public Dialog getDialog(final Context context) {
+        AlertDialog.Builder dialogBuilder = new AlertDialog.Builder(context);
 
-        LayoutInflater inflater = LayoutInflater.from(activityContext);
+        LayoutInflater inflater = LayoutInflater.from(context);
         final View view = inflater.inflate(getLayoutId(), null);
-        initUI(view, activityContext);
+        initUI(view, context);
 
         dialogBuilder.setView(view)
                 .setTitle(getTitle())
                 .setPositiveButton(R.string.dialog_save, new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialogInterface, int i) {
-                        saveData(view, activityContext);
+                        saveData(view, context);
                     }
                 })
                 .setNegativeButton(R.string.dialog_cancel, new DialogInterface.OnClickListener() {

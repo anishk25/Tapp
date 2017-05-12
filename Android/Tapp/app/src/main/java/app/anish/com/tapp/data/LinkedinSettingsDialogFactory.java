@@ -1,21 +1,20 @@
 package app.anish.com.tapp.data;
 
-import android.content.Context;
-import android.view.View;
+import app.anish.com.tapp.R;
 
 /**
  * Created by anish_khattar25 on 4/23/17.
  */
 
-public class LinkedinSettingsDialogFactory extends LoginBasedSettingsDialogFactory {
+public class LinkedinSettingsDialogFactory extends FragmentBasedSettingsDialogFactory {
 
     @Override
     protected String getTitle() {
-        return null;
+        return "LinkedIn";
     }
 
     @Override
     protected int getLayoutId() {
-        return 0;
+        return R.layout.linkedin_settings_alert_dialog;
     }
 }

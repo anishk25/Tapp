@@ -1,6 +1,6 @@
 package app.anish.com.tapp.data;
 
-import app.anish.com.tapp.shared_prefs.SharedPrefsKey;
+import app.anish.com.tapp.shared_prefs.SettingsInfo;
 
 /**
  * Created by anish_khattar25 on 4/23/17.
@@ -14,7 +14,7 @@ public class PhoneNumberSettingsDialogFactory extends SingleEditTextSettingsDial
     }
 
     @Override
-    protected SharedPrefsKey getKey() {
-        return SharedPrefsKey.PHONE_NUMBER;
+    protected String getKey() {
+        return SettingsInfo.PHONE_NUMBER.getInfoPrefKey();
     }
 }

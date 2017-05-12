@@ -5,6 +5,7 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
+import android.support.v4.app.FragmentTransaction;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -19,11 +20,13 @@ import com.facebook.login.LoginResult;
 import com.facebook.login.widget.LoginButton;
 
 import app.anish.com.tapp.R;
-import app.anish.com.tapp.shared_prefs.SharedPrefsKey;
-import app.anish.com.tapp.shared_prefs.SharedPrefsUtils;
+import app.anish.com.tapp.shared_prefs.SecuredSharedPrefs;
+import app.anish.com.tapp.shared_prefs.SettingsInfo;
+import app.anish.com.tapp.utils.SharedPrefsUtils;
 import app.anish.com.tapp.utils.Constants;
 
 /**
+ * TODO: You need to encrypt the Facebook Id being stored
  * Created by akhattar on 4/26/17.
  */
 
@@ -49,6 +52,20 @@ public class FacebookDialogFragment extends Fragment {
         return rootView;
     }
 
+    @Override
+    public void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+        mCallBackManager.onActivityResult(requestCode, resultCode, data);
+    }
+
+    @Override
+    public void onDestroyView() {
+        FacebookDialogFragment fragment = ((FacebookDialogFragment) getFragmentManager().findFragmentById(R.id.fragFacebook));
+        FragmentTransaction ft = getActivity().getSupportFragmentManager().beginTransaction();
+        ft.remove(fragment);
+        ft.commit();
+        super.onDestroyView();
+    }
 
     private void initUI(View rootView) {
         initFacebookButton(rootView);
@@ -91,22 +108,28 @@ public class FacebookDialogFragment extends Fragment {
                 int toastStringId;
                 if (currentProfile != null) {
                     toastStringId = R.string.login_success_message;
-                    SharedPrefsUtils.saveString(context, Constants.SETTINGS_SHARED_PREFS_KEY, SharedPrefsKey.FACEBOOK_ID.toString(), currentProfile.getId());
+                    saveFacebookInfo(currentProfile);
                 } else {
                     toastStringId = R.string.logout_success_message;
-                    SharedPrefsUtils.deleteKey(context, Constants.SETTINGS_SHARED_PREFS_KEY, SharedPrefsKey.FACEBOOK_ID.toString());
+                    deleteFacebookInfo();
                 }
                 Toast.makeText(context, toastStringId, Toast.LENGTH_SHORT).show();
-                // SEND A LOCAL BROADCAST HERE using LocalBroadcastManager
+                // TODO: Send a local broadcast here using LocalBroadcastManager
             }
         };
     }
 
+    private void saveFacebookInfo(Profile profile) {
+        SharedPrefsUtils.saveString(context, Constants.SETTINGS_SHARED_PREFS_KEY, SettingsInfo.FACEBOOK_NAME.toString(),
+                profile.getFirstName() + " " + profile.getLastName());
+        SharedPrefsUtils.saveString(context, Constants.SETTINGS_SHARED_PREFS_KEY, SecuredSharedPrefs.FACEBOOK_ID.toString(),
+                profile.getId());
 
-    @Override
-    public void onActivityResult(int requestCode, int resultCode, Intent data) {
-        super.onActivityResult(requestCode, resultCode, data);
-        mCallBackManager.onActivityResult(requestCode, resultCode, data);
+    }
+
+    private void deleteFacebookInfo() {
+        SharedPrefsUtils.deleteKey(context, Constants.SETTINGS_SHARED_PREFS_KEY, SettingsInfo.FACEBOOK_NAME.toString());
+        SharedPrefsUtils.deleteKey(context, Constants.SETTINGS_SHARED_PREFS_KEY, SecuredSharedPrefs.FACEBOOK_ID.toString());
     }
 
 }

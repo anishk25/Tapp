@@ -6,7 +6,7 @@
     <fragment
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:id="@+id/fragFacebook"
+        android:id="@+id/fragLinkedin"
         android:name="app.anish.com.tapp.fragments.LinkedinDialogFragment"
         android:layout_gravity="center_horizontal"
         />

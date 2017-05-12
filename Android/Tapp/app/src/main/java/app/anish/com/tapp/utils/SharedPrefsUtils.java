@@ -1,4 +1,4 @@
-package app.anish.com.tapp.shared_prefs;
+package app.anish.com.tapp.utils;
 
 import android.content.Context;
 import android.content.SharedPreferences;
@@ -16,10 +16,22 @@ public final class SharedPrefsUtils {
         return sharedPref.getString(valueKey, null);
     }
 
+    public static boolean getBoolean(Context context, String prefsKey, String valueKey) {
+        SharedPreferences sharedPref = context.getSharedPreferences(prefsKey, Context.MODE_PRIVATE);
+        return sharedPref.getBoolean(valueKey, false);
+    }
+
     public static void saveString(Context context, String prefsKey, String valueKey, String value) {
         SharedPreferences sharedPref = context.getSharedPreferences(prefsKey, Context.MODE_PRIVATE);
         SharedPreferences.Editor editor = sharedPref.edit();
         editor.putString(valueKey, value);
+        editor.commit();
+    }
+
+    public static void saveBoolean(Context context, String prefsKey, String valueKey, boolean value) {
+        SharedPreferences sharedPref = context.getSharedPreferences(prefsKey, Context.MODE_PRIVATE);
+        SharedPreferences.Editor editor = sharedPref.edit();
+        editor.putBoolean(valueKey, value);
         editor.commit();
     }
 

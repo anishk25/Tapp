@@ -5,11 +5,13 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
+import android.support.v4.app.FragmentTransaction;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.ProgressBar;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import com.linkedin.platform.APIHelper;
@@ -26,11 +28,13 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import app.anish.com.tapp.R;
-import app.anish.com.tapp.shared_prefs.SharedPrefsKey;
-import app.anish.com.tapp.shared_prefs.SharedPrefsUtils;
+import app.anish.com.tapp.shared_prefs.SecuredSharedPrefs;
+import app.anish.com.tapp.shared_prefs.SettingsInfo;
+import app.anish.com.tapp.utils.SharedPrefsUtils;
 import app.anish.com.tapp.utils.Constants;
 
 /**
+ * TODO: you need to encrypt the Linkedin Credential stuff
  * Created by akhattar on 4/28/17.
  * following this tutorial right now
  * https://www.studytutorial.in/linkedin-integration-and-login-in-android-tutorial
@@ -66,6 +70,14 @@ public class LinkedinDialogFragment extends Fragment {
         }
     }
 
+    @Override
+    public void onDestroyView() {
+        FacebookDialogFragment fragment = ((FacebookDialogFragment) getFragmentManager().findFragmentById(R.id.fragLinkedin));
+        FragmentTransaction ft = getActivity().getSupportFragmentManager().beginTransaction();
+        ft.remove(fragment);
+        ft.commit();
+        super.onDestroyView();
+    }
 
     private void initUIElements(View rootView) {
         loginButton = (Button) rootView.findViewById(R.id.bLinkedinButton);
@@ -78,23 +90,28 @@ public class LinkedinDialogFragment extends Fragment {
             public void onClick(View v) {
                 Boolean loggedIntoLinkedin = (Boolean) loginButton.getTag(R.integer.linkedin_login_status);
                 if (loggedIntoLinkedin == null || !loggedIntoLinkedin) {
-                    loginButton.setText(R.string.linkedin_logout_text);
-                    loginButton.setTag(R.integer.linkedin_login_status, true);
-                    toggleProgressBar();
-                    loginToLinkedin();
+                    startLoginFlow();
                 } else {
-                    loginButton.setText(R.string.linkedin_login_text);
-                    loginButton.setTag(R.integer.linkedin_login_status, false);
-                    logoutOfLinkedin();
+                    startLogoutFlow();
                 }
             }
         });
-
     }
 
+    private void startLoginFlow() {
+        loginButton.setText(R.string.linkedin_logout_text);
+        loginButton.setTag(R.integer.linkedin_login_status, true);
+        loginToLinkedin();
+    }
+
+    private void startLogoutFlow() {
+        loginButton.setText(R.string.linkedin_login_text);
+        loginButton.setTag(R.integer.linkedin_login_status, false);
+        logoutOfLinkedin();
+    }
 
     private void initInitialButtonState(Button loginButton) {
-        String linkedInId = SharedPrefsUtils.getString(context, Constants.SETTINGS_SHARED_PREFS_KEY, SharedPrefsKey.LINKEDIN_ID.toString());
+        String linkedInId = SharedPrefsUtils.getString(context, Constants.SETTINGS_SHARED_PREFS_KEY, SecuredSharedPrefs.LINKEDIN_ID.toString());
         if (linkedInId != null) {
             loginButton.setText(R.string.linkedin_logout_text);
             loginButton.setTag(R.integer.linkedin_login_status, true);
@@ -106,23 +123,22 @@ public class LinkedinDialogFragment extends Fragment {
 
     private void loginToLinkedin() {
         LISessionManager sessionManager = LISessionManager.getInstance(context);
-
+        toggleProgressBar();
         AccessToken existingToken = retrieveAccessToken();
         if (existingToken != null) {
             sessionManager.init(existingToken);
-            toggleProgressBar();
+            getUserId();
         } else {
             sessionManager.init(this, buildScope(), new AuthListener() {
                 @Override
                 public void onAuthSuccess() {
-                    getUserId();
                     saveCurrentAccessToken();
-                    toggleProgressBar();
-                    Toast.makeText(context, "Successfully logged into Linkedin!", Toast.LENGTH_LONG).show();
+                    getUserId();
                 }
 
                 @Override
                 public void onAuthError(LIAuthError error) {
+                    toggleProgressBar();
                     Toast.makeText(context, "Error logging into linkedin", Toast.LENGTH_LONG).show();
                 }
             }, true);
@@ -135,14 +151,14 @@ public class LinkedinDialogFragment extends Fragment {
 
 
     private void getUserId() {
-        String url = "https://api.linkedin.com/v1/people/~:(id)";
+        String url = "https://api.linkedin.com/v1/people/~:(id,first-name,last-name)";
         final APIHelper apiHelper = APIHelper.getInstance(context);
         apiHelper.getRequest(context, url, new ApiListener() {
             @Override
             public void onApiSuccess(ApiResponse apiResponse) {
                 JSONObject result = apiResponse.getResponseDataAsJson();
                 if (result != null) {
-                    saveLinkedinId(result);
+                    processAPISucess(result);
                 } else {
                     Toast.makeText(context, "Didn't get any data from LinkedIn", Toast.LENGTH_LONG).show();
                 }
@@ -156,15 +172,21 @@ public class LinkedinDialogFragment extends Fragment {
         });
     }
 
+    private void processAPISucess(JSONObject jsonObject) {
+        saveLinkedinInfo(jsonObject);
+        toggleProgressBar();
+        Toast.makeText(context, "Successfully logged into Linkedin!", Toast.LENGTH_LONG).show();
+    }
+
     private void saveCurrentAccessToken() {
         String accessToken = LISessionManager.getInstance(context)
                                 .getSession().getAccessToken().toString();
         SharedPrefsUtils.saveString(context, Constants.SETTINGS_SHARED_PREFS_KEY,
-                SharedPrefsKey.LINKEDIN_TOKEN.toString(), accessToken);
+                SecuredSharedPrefs.LINKEDIN_TOKEN.toString(), accessToken);
     }
 
     private AccessToken retrieveAccessToken() {
-        String tokenString = SharedPrefsUtils.getString(context, Constants.SETTINGS_SHARED_PREFS_KEY, SharedPrefsKey.LINKEDIN_TOKEN.toString());
+        String tokenString = SharedPrefsUtils.getString(context, Constants.SETTINGS_SHARED_PREFS_KEY, SecuredSharedPrefs.LINKEDIN_TOKEN.toString());
         if (tokenString != null) {
             return AccessToken.buildAccessToken(tokenString);
         }
@@ -179,18 +201,23 @@ public class LinkedinDialogFragment extends Fragment {
         }
     }
 
-    private void saveLinkedinId(JSONObject jsonObject) {
+    private void saveLinkedinInfo(JSONObject jsonObject) {
         try {
             String linkedinId = jsonObject.getString("id");
-            SharedPrefsUtils.saveString(context, Constants.SETTINGS_SHARED_PREFS_KEY, SharedPrefsKey.LINKEDIN_ID.toString(), linkedinId);
+            String firstName = jsonObject.getString("firstName");
+            String lastName = jsonObject.getString("lastName");
+            SharedPrefsUtils.saveString(context, Constants.SETTINGS_SHARED_PREFS_KEY, SecuredSharedPrefs.LINKEDIN_ID.toString(), linkedinId);
+            SharedPrefsUtils.saveString(context, Constants.SETTINGS_SHARED_PREFS_KEY, SettingsInfo.LINKEDIN_NAME.toString(),
+                    firstName + " " + lastName);
+
         } catch (JSONException e) {
-            Toast.makeText(context, "Error retrieving LinkedIn ID from result", Toast.LENGTH_LONG);
+            Toast.makeText(context, "Error retrieving Linkedin Info from result", Toast.LENGTH_LONG);
         }
     }
 
     private void logoutOfLinkedin() {
         // remove the linkedin id and access token from shared preferences
-        SharedPrefsUtils.deleteKey(context, Constants.SETTINGS_SHARED_PREFS_KEY, SharedPrefsKey.LINKEDIN_TOKEN.toString());
-        SharedPrefsUtils.deleteKey(context, Constants.SETTINGS_SHARED_PREFS_KEY, SharedPrefsKey.LINKEDIN_ID.toString());
+        SharedPrefsUtils.deleteKey(context, Constants.SETTINGS_SHARED_PREFS_KEY, SecuredSharedPrefs.LINKEDIN_TOKEN.toString());
+        SharedPrefsUtils.deleteKey(context, Constants.SETTINGS_SHARED_PREFS_KEY, SecuredSharedPrefs.LINKEDIN_ID.toString());
     }
 }
