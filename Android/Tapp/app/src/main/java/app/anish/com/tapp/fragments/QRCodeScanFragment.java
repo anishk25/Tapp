@@ -64,14 +64,20 @@ public class QRCodeScanFragment extends Fragment {
     public void setUserVisibleHint(boolean isVisibleToUser) {
         super.setUserVisibleHint(isVisibleToUser);
         if (isVisibleToUser) {
-            if (ContextCompat.checkSelfPermission(getContext(), Manifest.permission.CAMERA) != PackageManager.PERMISSION_GRANTED) {
-                ActivityCompat.requestPermissions(getActivity(), new String[]{Manifest.permission.CAMERA}, PERMISSIONS_REQUEST_FOR_CAMERA);
-            } else {
-                startCameraPreview();
-            }
+            reqCameraPermission();
         } else {
             if (mCamera != null) {
                 mCamera.stopPreview();
+            }
+        }
+    }
+
+    private void reqCameraPermission() {
+        if (reqCamPermButton.getVisibility() == View.GONE) {
+            if (ContextCompat.checkSelfPermission(getContext(), Manifest.permission.CAMERA) != PackageManager.PERMISSION_GRANTED) {
+                requestPermissions(new String[]{Manifest.permission.CAMERA}, PERMISSIONS_REQUEST_FOR_CAMERA);
+            } else {
+                startCameraPreview();
             }
         }
     }
@@ -81,19 +87,9 @@ public class QRCodeScanFragment extends Fragment {
             reqCamPermButton.setVisibility(View.VISIBLE);
             reqCamPermButton.setEnabled(true);
         } else {
-            startCameraPreview();
-        }
-    }
-
-    private void initializeCamera() {
-        mCamera = getCameraInstance();
-        if (mCamera != null) {
-            cameraScanProcessor = new CameraScanProcessor(mCamera, getContext());
-            mCameraPreview = new CameraPreview(getContext(), mCamera, previewCallback);
             reqCamPermButton.setVisibility(View.GONE);
             reqCamPermButton.setEnabled(false);
-            FrameLayout frameLayout = (FrameLayout) rootView.findViewById(R.id.flCamera);
-            frameLayout.addView(mCameraPreview);
+            startCameraPreview();
         }
     }
 
@@ -106,13 +102,24 @@ public class QRCodeScanFragment extends Fragment {
         }
     }
 
+    private void initializeCamera() {
+        mCamera = getCameraInstance();
+        if (mCamera != null) {
+            cameraScanProcessor = new CameraScanProcessor(mCamera, getContext());
+            mCameraPreview = new CameraPreview(getContext(), mCamera, previewCallback);
+            FrameLayout frameLayout = (FrameLayout) rootView.findViewById(R.id.flCamera);
+            frameLayout.addView(mCameraPreview);
+        }
+    }
+
     private void initReqPermButton() {
         reqCamPermButton = (Button) rootView.findViewById(R.id.bReqCameraPerm);
+        reqCamPermButton.setVisibility(View.GONE);
         reqCamPermButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 if (ContextCompat.checkSelfPermission(getContext(), Manifest.permission.CAMERA) != PackageManager.PERMISSION_GRANTED) {
-                    ActivityCompat.requestPermissions(getActivity(), new String[]{Manifest.permission.CAMERA}, PERMISSIONS_REQUEST_FOR_CAMERA);
+                    requestPermissions(new String[]{Manifest.permission.CAMERA}, PERMISSIONS_REQUEST_FOR_CAMERA);
                 }
             }
         });
