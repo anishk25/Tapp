@@ -11,7 +11,7 @@ import app.anish.com.tapp.data.PhoneNumberSettingsDialogFactory;
  * Created by akhattar on 5/5/17.
  */
 
-public enum SettingsInfo {
+public enum SettingsInfo implements SharePrefKeyInfo {
     OWNER_NAME {
         public String getInfoPrefKey() {
             return "OWNER_NAME";
@@ -99,8 +99,6 @@ public enum SettingsInfo {
     };
 
 
-    public abstract String getInfoPrefKey();
-    public abstract String getShareInfoPrefKey();
     public abstract String getTitle();
     public abstract DialogFactory getDialogFactory();
 

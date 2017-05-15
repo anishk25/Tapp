@@ -111,15 +111,15 @@ public class FacebookDialogFragment extends Fragment {
     }
 
     private void saveFacebookInfo(Profile profile) {
-        SharedPrefsUtils.saveString(context, Constants.SETTINGS_SHARED_PREFS_KEY, SettingsInfo.FACEBOOK_NAME.toString(),
+        SharedPrefsUtils.saveString(context, Constants.SETTINGS_SHARED_PREFS_KEY, SettingsInfo.FACEBOOK_NAME.getInfoPrefKey(),
                 profile.getFirstName() + " " + profile.getLastName());
-        SharedPrefsUtils.saveString(context, Constants.SETTINGS_SHARED_PREFS_KEY, SecuredSharedPrefs.FACEBOOK_ID.toString(),
+        SharedPrefsUtils.saveString(context, Constants.SETTINGS_SHARED_PREFS_KEY, SecuredSharedPrefs.FACEBOOK_ID.getInfoPrefKey(),
                 profile.getId());
 
     }
 
     private void deleteFacebookInfo() {
-        SharedPrefsUtils.deleteKey(context, Constants.SETTINGS_SHARED_PREFS_KEY, SettingsInfo.FACEBOOK_NAME.toString());
-        SharedPrefsUtils.deleteKey(context, Constants.SETTINGS_SHARED_PREFS_KEY, SecuredSharedPrefs.FACEBOOK_ID.toString());
+        SharedPrefsUtils.deleteKey(context, Constants.SETTINGS_SHARED_PREFS_KEY, SettingsInfo.FACEBOOK_NAME.getInfoPrefKey());
+        SharedPrefsUtils.deleteKey(context, Constants.SETTINGS_SHARED_PREFS_KEY, SecuredSharedPrefs.FACEBOOK_ID.getInfoPrefKey());
     }
 }
