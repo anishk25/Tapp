@@ -21,13 +21,29 @@
             android:layout_weight="25"
             />
 
-        <ImageView
-            android:layout_width="0dp"
+
+        <FrameLayout
+            android:layout_width="wrap_content"
             android:layout_height="match_parent"
-            android:src="@drawable/ic_qrcode_holder"
-            android:layout_gravity="center_horizontal"
             android:layout_weight="50"
-            />
+            >
+            <ImageView
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:id="@+id/ivQrCode"
+                android:src="@drawable/ic_qrcode_holder"
+                android:layout_gravity="center_horizontal"
+                />
+
+            <ProgressBar
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center"
+                android:id="@+id/pbQrCode"
+                android:visibility="gone"
+                />
+        </FrameLayout>
+
 
         <View
             android:layout_width="0dp"
@@ -37,6 +53,7 @@
             />
 
     </LinearLayout>
+
 
     <FrameLayout
         android:layout_width="match_parent"

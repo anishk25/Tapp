@@ -8,24 +8,41 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
+import android.graphics.Bitmap;
 import android.os.Build;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.ViewTreeObserver;
 import android.widget.Button;
+import android.widget.ImageView;
+import android.widget.ProgressBar;
 import android.widget.Toast;
 
-import com.facebook.CallbackManager;
-import com.facebook.ProfileTracker;
+import com.google.zxing.BarcodeFormat;
+import com.google.zxing.EncodeHintType;
+import com.google.zxing.MultiFormatWriter;
+import com.google.zxing.common.BitMatrix;
+import com.google.zxing.qrcode.decoder.ErrorCorrectionLevel;
+
+import org.json.JSONException;
+import org.json.JSONObject;
+
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.Map;
 
 import app.anish.com.tapp.R;
 import app.anish.com.tapp.activities.SettingsActivity;
 import app.anish.com.tapp.data.ContactInfo;
+import app.anish.com.tapp.shared_prefs.SecuredSharedPrefs;
 import app.anish.com.tapp.shared_prefs.SettingsInfo;
+import app.anish.com.tapp.shared_prefs.SharePrefKeyInfo;
 import app.anish.com.tapp.utils.Constants;
 import app.anish.com.tapp.utils.SharedPrefsUtils;
 
@@ -35,10 +52,19 @@ import app.anish.com.tapp.utils.SharedPrefsUtils;
 
 public class QRCodeDisplayFragment extends Fragment implements View.OnClickListener {
 
+    private static final String TAG = QRCodeDisplayFragment.class.getName();
     private static final String APP_OPENED_FIRST_TIME_KEY = "APP_OPENED_FIRST_TIME";
+    private static final String QR_CODE_CHAR_SET = "ISO-8859-1";
+    private static final String QR_CODE_BITMAP_FILE = "qr_code_bitmap";
     private static final int PERMISSIONS_REQUEST_READ_CONTACTS = 1;
+    private static final int SETTINGS_ACTIVITY_RESULT_CODE = 2;
 
+    // UI Elements
     private Activity mActivity;
+    private ImageView qrImage;
+    private String currQRData;
+    private ProgressBar qrProgressBar;
+
 
 
     @Override
@@ -76,16 +102,25 @@ public class QRCodeDisplayFragment extends Fragment implements View.OnClickListe
         }
     }
 
+    @Override
+    public void onActivityResult(int requestCode, int resultCode, Intent data) {
+        if (requestCode == SETTINGS_ACTIVITY_RESULT_CODE) {
+            redrawQRCode();
+        }
+    }
+
     private void initUI(View rootView) {
+        qrProgressBar = (ProgressBar) rootView.findViewById(R.id.pbQrCode);
+        qrImage = (ImageView) rootView.findViewById(R.id.ivQrCode);
+        initQRImage();
         Button settingsButton = (Button) rootView.findViewById(R.id.bQRCodeSettings);
         settingsButton.setOnClickListener(this);
     }
 
 
-
     private void launchSettingsActivity() {
         Intent intent = new Intent(getContext(), SettingsActivity.class);
-        startActivity(intent);
+        startActivityForResult(intent, SETTINGS_ACTIVITY_RESULT_CODE);
     }
 
     private void populateContactInfo() {
@@ -106,6 +141,9 @@ public class QRCodeDisplayFragment extends Fragment implements View.OnClickListe
         editor.putString(SettingsInfo.OWNER_NAME.getInfoPrefKey(), ownerName);
         editor.putString(SettingsInfo.PHONE_NUMBER.getInfoPrefKey(), phoneNumber);
         editor.putString(SettingsInfo.EMAIL.getInfoPrefKey(), email);
+        editor.putBoolean(SettingsInfo.OWNER_NAME.getShareInfoPrefKey(), true);
+        editor.putBoolean(SettingsInfo.PHONE_NUMBER.getShareInfoPrefKey(), true);
+        editor.putBoolean(SettingsInfo.EMAIL.getShareInfoPrefKey(), true);
         editor.commit();
     }
 
@@ -118,7 +156,7 @@ public class QRCodeDisplayFragment extends Fragment implements View.OnClickListe
                     public void onClick(DialogInterface dialogInterface, int i) {
                         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M && mActivity.checkSelfPermission(Manifest.permission.READ_CONTACTS)
                                 != PackageManager.PERMISSION_GRANTED
-                                && mActivity.checkSelfPermission(Manifest.permission.READ_SMS)  != PackageManager.PERMISSION_GRANTED) {
+                                && mActivity.checkSelfPermission(Manifest.permission.READ_SMS) != PackageManager.PERMISSION_GRANTED) {
                             requestPermissions(new String[]{Manifest.permission.READ_CONTACTS, Manifest.permission.READ_SMS}, PERMISSIONS_REQUEST_READ_CONTACTS);
                         }
                     }
@@ -137,12 +175,111 @@ public class QRCodeDisplayFragment extends Fragment implements View.OnClickListe
                 " automatically encoded in QR code. Go to settings to enter contact info", Toast.LENGTH_LONG).show();
     }
 
-    private boolean allPermissionsGranted(int [] grantResults) {
+    private boolean allPermissionsGranted(int[] grantResults) {
         for (int result : grantResults) {
             if (result != PackageManager.PERMISSION_GRANTED) {
                 return false;
             }
         }
         return true;
+    }
+
+    private void initQRImage() {
+        try {
+            currQRData = getSavedContactInfo();
+            drawQRCode(currQRData);
+        } catch (Exception e) {
+            Toast.makeText(mActivity, "Error Intializing QR Code with contact data", Toast.LENGTH_LONG);
+        }
+    }
+
+    private void redrawQRCode() {
+        // do diff of current data on QR code and new data
+        try {
+            String updatedData = getSavedContactInfo();
+            if (!currQRData.equals(updatedData)) {
+                drawQRCode(updatedData);
+                currQRData = updatedData;
+            }
+        } catch (Exception e) {
+            Toast.makeText(mActivity, "Error redrawing QR code", Toast.LENGTH_LONG);
+        }
+
+    }
+
+
+    private void drawQRCode(final String data) throws Exception {
+        qrImage.setVisibility(View.GONE);
+        qrProgressBar.setVisibility(View.VISIBLE);
+
+        Thread thread = new Thread(new Runnable() {
+            public void run() {
+                try {
+                    //final Bitmap bitmap = createQRCode(data, qrImage.getMeasuredWidth(),
+                    //        qrImage.getMeasuredHeight());
+                    final Bitmap bitmap = createQRCode(data, 400, 400);
+                    qrImage.post(new Runnable() {
+                        public void run() {
+                            qrImage.setImageBitmap(bitmap);
+                            qrImage.setVisibility(View.VISIBLE);
+                            qrProgressBar.setVisibility(View.GONE);
+                        }
+                    });
+                } catch (Exception e) {
+                    Log.d(TAG, "Error generating bitmap image");
+                }
+            }
+        });
+        thread.start();
+    }
+
+    private String getSavedContactInfo() throws JSONException {
+        JSONObject obj1 = getSavedData(SettingsInfo.values());
+        JSONObject obj2 = getSavedData(SecuredSharedPrefs.values());
+        JSONObject result = mergeJSONObjects(obj1, obj2);
+        return result.toString();
+    }
+
+
+    private JSONObject getSavedData(SharePrefKeyInfo[] keyInfoArr) throws JSONException {
+        JSONObject jsonObject = new JSONObject();
+        for (SharePrefKeyInfo info : keyInfoArr) {
+            boolean shareable = SharedPrefsUtils.getBoolean(mActivity, Constants.SETTINGS_SHARED_PREFS_KEY, info.getShareInfoPrefKey());
+            if (shareable) {
+                String data = SharedPrefsUtils.getString(mActivity, Constants.SETTINGS_SHARED_PREFS_KEY, info.getInfoPrefKey());
+                if (data != null) {
+                    jsonObject.put(info.toString(), data);
+                }
+            }
+        }
+        return jsonObject;
+    }
+
+    private JSONObject mergeJSONObjects(JSONObject object1, JSONObject object2) throws JSONException {
+        JSONObject result = new JSONObject(object1.toString());
+        Iterator<String> it = object2.keys();
+        while (it.hasNext()) {
+            result.put(it.next(), object2.get(it.next()));
+        }
+        return result;
+    }
+
+    private Bitmap createQRCode(String data, int width, int height) throws Exception {
+        Bitmap bitmap = Bitmap.createBitmap(width, height, Bitmap.Config.RGB_565);
+        Map<EncodeHintType, ErrorCorrectionLevel> hintMap = new HashMap<>();
+        hintMap.put(EncodeHintType.ERROR_CORRECTION, ErrorCorrectionLevel.L);
+
+        BitMatrix matrix;
+
+
+        matrix = new MultiFormatWriter().encode(new String(data.getBytes(QR_CODE_CHAR_SET), QR_CODE_CHAR_SET),
+                BarcodeFormat.QR_CODE, width, height, hintMap);
+
+        for (int x = 0; x < width; x++) {
+            for (int y = 0; y < height; y++) {
+                bitmap.setPixel(x, y, matrix.get(x, y) ? 0xff000000 : 0xffffffff);
+            }
+        }
+        return bitmap;
     }
 }
