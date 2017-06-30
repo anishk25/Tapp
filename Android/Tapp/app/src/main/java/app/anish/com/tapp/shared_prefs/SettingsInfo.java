@@ -26,6 +26,10 @@ public enum SettingsInfo implements SharePrefKeyInfo {
         public DialogFactory getDialogFactory() {
             return new OwnerNameSettingsDialogFactory();
         }
+
+        public boolean isMandatoryShare() {
+            return true;
+        }
     },
     EMAIL {
         public String getInfoPrefKey() {
@@ -101,6 +105,10 @@ public enum SettingsInfo implements SharePrefKeyInfo {
 
     public abstract String getTitle();
     public abstract DialogFactory getDialogFactory();
+    public boolean isMandatoryShare() {
+        return false;
+    }
+
 
     public String getInfoPrefix() {
         return "";

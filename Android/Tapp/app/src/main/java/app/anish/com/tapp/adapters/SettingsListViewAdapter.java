@@ -47,6 +47,7 @@ public class SettingsListViewAdapter extends ArrayAdapter<SettingsInfo> {
             convertView = inflater.inflate(R.layout.cv_settings_base_content, parent, false);
             viewHolder = createViewHolder(convertView);
             convertView.setTag(R.integer.view_holder_tag, viewHolder);
+            checkAndDisableShareOption(settingsInfo, viewHolder);
             setupOnClickListenerForListItemView(convertView, viewHolder, settingsInfo);
             setupCheckboxListener(viewHolder.shareCheckBox, settingsInfo);
         } else {
@@ -63,6 +64,7 @@ public class SettingsListViewAdapter extends ArrayAdapter<SettingsInfo> {
         viewHolder.tvTitle = (TextView) rootView.findViewById(R.id.tvSettingsItemTitle);
         viewHolder.tvDetails = (TextView) rootView.findViewById(R.id.tvSettingsItemDetail);
         viewHolder.shareCheckBox = (CheckBox) rootView.findViewById(R.id.shareCheckBox);
+        viewHolder.shareLabel = (TextView) rootView.findViewById(R.id.tvShareLabel);
         return viewHolder;
     }
 
@@ -114,7 +116,7 @@ public class SettingsListViewAdapter extends ArrayAdapter<SettingsInfo> {
                 // check if data is present in shared pref
                 if(isChecked && SharedPrefsUtils.getString(mContext, Constants.SETTINGS_SHARED_PREFS_KEY, settingsInfo.getInfoPrefKey()) == null) {
                     checkBox.setChecked(false);
-                    Toast.makeText(mContext, "Porperty must be set before enabling share", Toast.LENGTH_LONG).show();
+                    Toast.makeText(mContext, "Property must be set before enabling share", Toast.LENGTH_LONG).show();
                 } else {
                     SharedPrefsUtils.saveBoolean(mContext, Constants.SETTINGS_SHARED_PREFS_KEY,
                             settingsInfo.getShareInfoPrefKey(), isChecked);
@@ -123,6 +125,8 @@ public class SettingsListViewAdapter extends ArrayAdapter<SettingsInfo> {
         });
     }
 
+
+
     private String getDetailDispString(SettingsInfo settingsInfo) {
         String prefix = settingsInfo.getInfoPrefix();
         String details = SharedPrefsUtils.getString(mContext, Constants.SETTINGS_SHARED_PREFS_KEY,
@@ -130,9 +134,17 @@ public class SettingsListViewAdapter extends ArrayAdapter<SettingsInfo> {
         return details == null ? "Not Set" : prefix + details;
     }
 
+    private void checkAndDisableShareOption(SettingsInfo settingsInfo, ViewHolder viewHolder) {
+        if(settingsInfo.isMandatoryShare()) {
+            viewHolder.shareCheckBox.setVisibility(View.GONE);
+            viewHolder.shareLabel.setVisibility(View.GONE);
+        }
+    }
+
     private static class ViewHolder {
         TextView tvTitle;
         TextView tvDetails;
+        TextView shareLabel;
         CheckBox shareCheckBox;
     }
 }

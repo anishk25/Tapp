@@ -282,4 +282,6 @@ public class QRCodeDisplayFragment extends Fragment implements View.OnClickListe
         }
         return bitmap;
     }
+
+
 }
