@@ -1,17 +1,13 @@
 package app.anish.com.tapp.data;
 
-import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.Dialog;
 import android.content.Context;
 import android.content.DialogInterface;
-import android.support.v4.app.FragmentTransaction;
-import android.support.v4.content.pm.ActivityInfoCompat;
 import android.view.LayoutInflater;
 import android.view.View;
 
 import app.anish.com.tapp.R;
-import app.anish.com.tapp.fragments.FacebookDialogFragment;
 
 /**
  * Created by anish_khattar25 on 4/24/17.

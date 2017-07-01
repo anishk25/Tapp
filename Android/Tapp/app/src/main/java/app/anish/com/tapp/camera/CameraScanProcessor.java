@@ -4,7 +4,6 @@ import android.app.AlertDialog;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.hardware.Camera;
-import android.util.Log;
 
 import net.sourceforge.zbar.Image;
 import net.sourceforge.zbar.ImageScanner;

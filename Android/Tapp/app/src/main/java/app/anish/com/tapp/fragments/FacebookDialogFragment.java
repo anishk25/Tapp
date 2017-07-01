@@ -105,7 +105,6 @@ public class FacebookDialogFragment extends Fragment {
                     deleteFacebookInfo();
                 }
                 Toast.makeText(context, toastStringId, Toast.LENGTH_SHORT).show();
-                // TODO: Send a local broadcast here using LocalBroadcastManager
             }
         };
     }

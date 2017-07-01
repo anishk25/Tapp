@@ -1,22 +1,14 @@
 package app.anish.com.tapp.activities;
 
-import android.content.Context;
-import android.content.SharedPreferences;
-import android.support.design.widget.TabLayout;
-import android.support.v7.app.AppCompatActivity;
-
-import android.support.v4.app.FragmentPagerAdapter;
-import android.support.v4.view.ViewPager;
 import android.os.Bundle;
+import android.support.design.widget.TabLayout;
+import android.support.v4.view.ViewPager;
+import android.support.v7.app.AppCompatActivity;
 import android.view.Menu;
 import android.view.MenuItem;
 
-
 import app.anish.com.tapp.R;
 import app.anish.com.tapp.adapters.SectionsPagerAdapter;
-import app.anish.com.tapp.data.ContactInfo;
-import app.anish.com.tapp.utils.Constants;
-import app.anish.com.tapp.utils.SharedPrefsUtils;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -27,13 +19,10 @@ public class MainActivity extends AppCompatActivity {
      */
     private ViewPager mViewPager;
 
-    private Context mContext;
-
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-
 
         //Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         //setSupportActionBar(toolbar);
@@ -49,8 +38,6 @@ public class MainActivity extends AppCompatActivity {
 
         TabLayout tabLayout = (TabLayout) findViewById(R.id.tabs);
         tabLayout.setupWithViewPager(mViewPager);
-
-        mContext = getApplicationContext();
     }
 
     @Override
@@ -74,6 +61,4 @@ public class MainActivity extends AppCompatActivity {
 
         return super.onOptionsItemSelected(item);
     }
-
-
 }

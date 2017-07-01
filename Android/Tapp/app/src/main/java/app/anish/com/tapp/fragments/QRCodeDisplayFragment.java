@@ -215,8 +215,7 @@ public class QRCodeDisplayFragment extends Fragment implements View.OnClickListe
         Thread thread = new Thread(new Runnable() {
             public void run() {
                 try {
-                    //final Bitmap bitmap = createQRCode(data, qrImage.getMeasuredWidth(),
-                    //        qrImage.getMeasuredHeight());
+
                     final Bitmap bitmap = createQRCode(data, 400, 400);
                     qrImage.post(new Runnable() {
                         public void run() {
