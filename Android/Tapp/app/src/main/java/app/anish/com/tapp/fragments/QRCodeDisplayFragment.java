@@ -8,6 +8,7 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
+import android.content.pm.Signature;
 import android.graphics.Bitmap;
 import android.os.Build;
 import android.os.Bundle;
@@ -18,7 +19,6 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.view.ViewTreeObserver;
 import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.ProgressBar;
@@ -43,7 +43,7 @@ import app.anish.com.tapp.data.ContactInfo;
 import app.anish.com.tapp.shared_prefs.SecuredSharedPrefs;
 import app.anish.com.tapp.shared_prefs.SettingsInfo;
 import app.anish.com.tapp.shared_prefs.SharePrefKeyInfo;
-import app.anish.com.tapp.utils.Constants;
+import app.anish.com.tapp.utils.AppConstants;
 import app.anish.com.tapp.utils.SharedPrefsUtils;
 
 /**
@@ -55,7 +55,6 @@ public class QRCodeDisplayFragment extends Fragment implements View.OnClickListe
     private static final String TAG = QRCodeDisplayFragment.class.getName();
     private static final String APP_OPENED_FIRST_TIME_KEY = "APP_OPENED_FIRST_TIME";
     private static final String QR_CODE_CHAR_SET = "ISO-8859-1";
-    private static final String QR_CODE_BITMAP_FILE = "qr_code_bitmap";
     private static final int PERMISSIONS_REQUEST_READ_CONTACTS = 1;
     private static final int SETTINGS_ACTIVITY_RESULT_CODE = 2;
 
@@ -124,9 +123,9 @@ public class QRCodeDisplayFragment extends Fragment implements View.OnClickListe
     }
 
     private void populateContactInfo() {
-        boolean opened = SharedPrefsUtils.getBoolean(mActivity, Constants.SETTINGS_SHARED_PREFS_KEY, APP_OPENED_FIRST_TIME_KEY);
+        boolean opened = SharedPrefsUtils.getBoolean(mActivity, AppConstants.SETTINGS_SHARED_PREFS_KEY, APP_OPENED_FIRST_TIME_KEY);
         if (!opened) {
-            SharedPrefsUtils.saveBoolean(mActivity, Constants.SETTINGS_SHARED_PREFS_KEY, APP_OPENED_FIRST_TIME_KEY, true);
+            SharedPrefsUtils.saveBoolean(mActivity, AppConstants.SETTINGS_SHARED_PREFS_KEY, APP_OPENED_FIRST_TIME_KEY, true);
             showPermissionDialog();
         }
     }
@@ -136,7 +135,7 @@ public class QRCodeDisplayFragment extends Fragment implements View.OnClickListe
         String phoneNumber = ContactInfo.getCurrentPhoneNumber(mActivity);
         String email = ContactInfo.getOwnerEmail(mActivity);
 
-        SharedPreferences sharedPref = mActivity.getSharedPreferences(Constants.SETTINGS_SHARED_PREFS_KEY, Context.MODE_PRIVATE);
+        SharedPreferences sharedPref = mActivity.getSharedPreferences(AppConstants.SETTINGS_SHARED_PREFS_KEY, Context.MODE_PRIVATE);
         SharedPreferences.Editor editor = sharedPref.edit();
         editor.putString(SettingsInfo.OWNER_NAME.getInfoPrefKey(), ownerName);
         editor.putString(SettingsInfo.PHONE_NUMBER.getInfoPrefKey(), phoneNumber);
@@ -236,6 +235,11 @@ public class QRCodeDisplayFragment extends Fragment implements View.OnClickListe
         JSONObject obj1 = getSavedData(SettingsInfo.values());
         JSONObject obj2 = getSavedData(SecuredSharedPrefs.values());
         JSONObject result = mergeJSONObjects(obj1, obj2);
+
+        // insert App Json Signature into final Json object
+        String signature = getResources().getString(R.string.json_share_signature);
+        result.put(AppConstants.JSON_SIGNATURE_KEY, signature);
+
         return result.toString();
     }
 
@@ -243,9 +247,9 @@ public class QRCodeDisplayFragment extends Fragment implements View.OnClickListe
     private JSONObject getSavedData(SharePrefKeyInfo[] keyInfoArr) throws JSONException {
         JSONObject jsonObject = new JSONObject();
         for (SharePrefKeyInfo info : keyInfoArr) {
-            boolean shareable = SharedPrefsUtils.getBoolean(mActivity, Constants.SETTINGS_SHARED_PREFS_KEY, info.getShareInfoPrefKey());
+            boolean shareable = SharedPrefsUtils.getBoolean(mActivity, AppConstants.SETTINGS_SHARED_PREFS_KEY, info.getShareInfoPrefKey());
             if (shareable) {
-                String data = SharedPrefsUtils.getString(mActivity, Constants.SETTINGS_SHARED_PREFS_KEY, info.getInfoPrefKey());
+                String data = SharedPrefsUtils.getString(mActivity, AppConstants.SETTINGS_SHARED_PREFS_KEY, info.getInfoPrefKey());
                 if (data != null) {
                     jsonObject.put(info.toString(), data);
                 }
@@ -281,6 +285,4 @@ public class QRCodeDisplayFragment extends Fragment implements View.OnClickListe
         }
         return bitmap;
     }
-
-
 }
