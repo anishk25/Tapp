@@ -5,7 +5,6 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
-import android.support.v4.app.FragmentTransaction;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -23,7 +22,7 @@ import app.anish.com.tapp.R;
 import app.anish.com.tapp.shared_prefs.SecuredSharedPrefs;
 import app.anish.com.tapp.shared_prefs.SettingsInfo;
 import app.anish.com.tapp.utils.SharedPrefsUtils;
-import app.anish.com.tapp.utils.Constants;
+import app.anish.com.tapp.utils.AppConstants;
 
 /**
  * TODO: You need to encrypt the Facebook Id being stored
@@ -110,15 +109,15 @@ public class FacebookDialogFragment extends Fragment {
     }
 
     private void saveFacebookInfo(Profile profile) {
-        SharedPrefsUtils.saveString(context, Constants.SETTINGS_SHARED_PREFS_KEY, SettingsInfo.FACEBOOK_NAME.getInfoPrefKey(),
+        SharedPrefsUtils.saveString(context, AppConstants.SETTINGS_SHARED_PREFS_KEY, SettingsInfo.FACEBOOK_NAME.getInfoPrefKey(),
                 profile.getFirstName() + " " + profile.getLastName());
-        SharedPrefsUtils.saveString(context, Constants.SETTINGS_SHARED_PREFS_KEY, SecuredSharedPrefs.FACEBOOK_ID.getInfoPrefKey(),
+        SharedPrefsUtils.saveString(context, AppConstants.SETTINGS_SHARED_PREFS_KEY, SecuredSharedPrefs.FACEBOOK_ID.getInfoPrefKey(),
                 profile.getId());
 
     }
 
     private void deleteFacebookInfo() {
-        SharedPrefsUtils.deleteKey(context, Constants.SETTINGS_SHARED_PREFS_KEY, SettingsInfo.FACEBOOK_NAME.getInfoPrefKey());
-        SharedPrefsUtils.deleteKey(context, Constants.SETTINGS_SHARED_PREFS_KEY, SecuredSharedPrefs.FACEBOOK_ID.getInfoPrefKey());
+        SharedPrefsUtils.deleteKey(context, AppConstants.SETTINGS_SHARED_PREFS_KEY, SettingsInfo.FACEBOOK_NAME.getInfoPrefKey());
+        SharedPrefsUtils.deleteKey(context, AppConstants.SETTINGS_SHARED_PREFS_KEY, SecuredSharedPrefs.FACEBOOK_ID.getInfoPrefKey());
     }
 }

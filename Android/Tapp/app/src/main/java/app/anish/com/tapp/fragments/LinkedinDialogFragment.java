@@ -5,14 +5,12 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
-import android.support.v4.app.FragmentTransaction;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.ProgressBar;
-import android.widget.TextView;
 import android.widget.Toast;
 
 import com.linkedin.platform.APIHelper;
@@ -33,7 +31,7 @@ import app.anish.com.tapp.shared_prefs.SecuredSharedPrefs;
 import app.anish.com.tapp.shared_prefs.SettingsInfo;
 import app.anish.com.tapp.shared_prefs.Token;
 import app.anish.com.tapp.utils.SharedPrefsUtils;
-import app.anish.com.tapp.utils.Constants;
+import app.anish.com.tapp.utils.AppConstants;
 
 /**
  * TODO: you need to encrypt the Linkedin Credential stuff
@@ -104,7 +102,7 @@ public class LinkedinDialogFragment extends Fragment {
     }
 
     private void initInitialButtonState(Button loginButton) {
-        String linkedInId = SharedPrefsUtils.getString(context, Constants.SETTINGS_SHARED_PREFS_KEY, SecuredSharedPrefs.LINKEDIN_ID.toString());
+        String linkedInId = SharedPrefsUtils.getString(context, AppConstants.SETTINGS_SHARED_PREFS_KEY, SecuredSharedPrefs.LINKEDIN_ID.toString());
         if (linkedInId != null) {
             loginButton.setText(R.string.linkedin_logout_text);
             loginButton.setTag(R.integer.linkedin_login_status, true);
@@ -175,12 +173,12 @@ public class LinkedinDialogFragment extends Fragment {
     private void saveCurrentAccessToken() {
         String accessToken = LISessionManager.getInstance(context)
                                 .getSession().getAccessToken().toString();
-        SharedPrefsUtils.saveString(context, Constants.SETTINGS_SHARED_PREFS_KEY,
+        SharedPrefsUtils.saveString(context, AppConstants.SETTINGS_SHARED_PREFS_KEY,
                 Token.LINKEDIN.toString(), accessToken);
     }
 
     private AccessToken retrieveAccessToken() {
-        String tokenString = SharedPrefsUtils.getString(context, Constants.SETTINGS_SHARED_PREFS_KEY, Token.LINKEDIN.toString());
+        String tokenString = SharedPrefsUtils.getString(context, AppConstants.SETTINGS_SHARED_PREFS_KEY, Token.LINKEDIN.toString());
         if (tokenString != null) {
             return AccessToken.buildAccessToken(tokenString);
         }
@@ -200,8 +198,8 @@ public class LinkedinDialogFragment extends Fragment {
             String linkedinId = jsonObject.getString("id");
             String firstName = jsonObject.getString("firstName");
             String lastName = jsonObject.getString("lastName");
-            SharedPrefsUtils.saveString(context, Constants.SETTINGS_SHARED_PREFS_KEY, SecuredSharedPrefs.LINKEDIN_ID.getInfoPrefKey(), linkedinId);
-            SharedPrefsUtils.saveString(context, Constants.SETTINGS_SHARED_PREFS_KEY, SettingsInfo.LINKEDIN_NAME.getInfoPrefKey(),
+            SharedPrefsUtils.saveString(context, AppConstants.SETTINGS_SHARED_PREFS_KEY, SecuredSharedPrefs.LINKEDIN_ID.getInfoPrefKey(), linkedinId);
+            SharedPrefsUtils.saveString(context, AppConstants.SETTINGS_SHARED_PREFS_KEY, SettingsInfo.LINKEDIN_NAME.getInfoPrefKey(),
                     firstName + " " + lastName);
 
         } catch (JSONException e) {
@@ -211,8 +209,8 @@ public class LinkedinDialogFragment extends Fragment {
 
     private void logoutOfLinkedin() {
         // remove the linkedin id and access token from shared preferences
-        SharedPrefsUtils.deleteKey(context, Constants.SETTINGS_SHARED_PREFS_KEY, Token.LINKEDIN.toString());
-        SharedPrefsUtils.deleteKey(context, Constants.SETTINGS_SHARED_PREFS_KEY, SecuredSharedPrefs.LINKEDIN_ID.getInfoPrefKey());
-        SharedPrefsUtils.deleteKey(context, Constants.SETTINGS_SHARED_PREFS_KEY, SettingsInfo.LINKEDIN_NAME.getInfoPrefKey());
+        SharedPrefsUtils.deleteKey(context, AppConstants.SETTINGS_SHARED_PREFS_KEY, Token.LINKEDIN.toString());
+        SharedPrefsUtils.deleteKey(context, AppConstants.SETTINGS_SHARED_PREFS_KEY, SecuredSharedPrefs.LINKEDIN_ID.getInfoPrefKey());
+        SharedPrefsUtils.deleteKey(context, AppConstants.SETTINGS_SHARED_PREFS_KEY, SettingsInfo.LINKEDIN_NAME.getInfoPrefKey());
     }
 }
