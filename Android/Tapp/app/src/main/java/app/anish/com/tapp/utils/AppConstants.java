@@ -7,4 +7,5 @@ package app.anish.com.tapp.utils;
 public abstract class AppConstants {
     public static final String SETTINGS_SHARED_PREFS_KEY = "SETTINGS";
     public static final String JSON_SIGNATURE_KEY = "TappJsonSignature";
+
 }

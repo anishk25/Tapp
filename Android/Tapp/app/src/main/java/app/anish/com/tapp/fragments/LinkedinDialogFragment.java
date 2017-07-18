@@ -43,6 +43,8 @@ import app.anish.com.tapp.utils.AppConstants;
 
 public class LinkedinDialogFragment extends Fragment {
 
+    private static final String LINKEDIN_APP_PACKAGE_NAME = "com.linkedin.android";
+
     private Button loginButton;
     private ProgressBar progressBar;
     private Context context;
@@ -116,7 +118,7 @@ public class LinkedinDialogFragment extends Fragment {
         LISessionManager sessionManager = LISessionManager.getInstance(context);
         toggleProgressBar();
         AccessToken existingToken = retrieveAccessToken();
-        if (existingToken != null) {
+        if (existingToken != null && !existingToken.isExpired()) {
             sessionManager.init(existingToken);
             getUserId();
         } else {
@@ -173,6 +175,7 @@ public class LinkedinDialogFragment extends Fragment {
     private void saveCurrentAccessToken() {
         String accessToken = LISessionManager.getInstance(context)
                                 .getSession().getAccessToken().toString();
+
         SharedPrefsUtils.saveString(context, AppConstants.SETTINGS_SHARED_PREFS_KEY,
                 Token.LINKEDIN.toString(), accessToken);
     }
