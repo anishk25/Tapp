@@ -25,8 +25,8 @@ import java.io.Serializable;
 
 public class AccessToken implements Serializable {
 
-    private static final String ACCESS_TOKEN_VALUE = "accessTokenValue";
-    private static final String EXPIRES_ON = "expiresOn";
+    public static final String ACCESS_TOKEN_VALUE = "accessTokenValue";
+    public static final String EXPIRES_ON = "expiresOn";
     private static final String TAG = AccessToken.class.getSimpleName();
 
     private final String accessTokenValue;

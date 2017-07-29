@@ -13,9 +13,9 @@ import java.security.NoSuchAlgorithmException;
  * Created by anish_khattar25 on 7/1/17.
  */
 
-public class ContextUtils {
+public final class PackageUtils {
 
-    public String getPackageHashKey(Context context) {
+    public static String getPackageHashKey(Context context) {
         try {
             PackageInfo info = context.getPackageManager().getPackageInfo(
                     context.getPackageName(),
@@ -31,4 +31,15 @@ public class ContextUtils {
         }
         return null;
     }
+
+    public static boolean isPackageInstalled(Context context, String packageName) {
+        try {
+            context.getPackageManager().getPackageInfo(packageName, 0);
+            return true;
+        } catch (PackageManager.NameNotFoundException e) {
+            return false;
+        }
+    }
+
+
 }

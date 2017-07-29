@@ -29,6 +29,6 @@
     <string name = "linkedin_logout_text">Logout from LinkedIn</string>
 
     <string name = "json_share_signature">Tapp536114IsAwesome</string>
-
+    <string name="loading">Loading &#8230;</string>
 
 </resources>
