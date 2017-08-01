@@ -20,15 +20,6 @@ import app.anish.com.tapp.utils.SharedPrefsUtils;
 public abstract class LinkedInLoginFlow {
     public abstract void startFlow();
 
-    protected static void saveLinkedInInfo(JSONObject jsonObject, Context context) throws JSONException {
-        String linkedInId = jsonObject.getString("id");
-        String firstName = jsonObject.getString("firstName");
-        String lastName = jsonObject.getString("lastName");
-        SharedPrefsUtils.saveString(context, AppConstants.SETTINGS_SHARED_PREFS_KEY, SecuredSharedPrefs.LINKEDIN_ID.getInfoPrefKey(), linkedInId);
-        SharedPrefsUtils.saveString(context, AppConstants.SETTINGS_SHARED_PREFS_KEY, SettingsInfo.LINKEDIN_NAME.getInfoPrefKey(),
-                firstName + " " + lastName);
-    }
-
     public interface FlowCompletionListener {
         void onSuccess();
         void onFailure(Throwable throwable);

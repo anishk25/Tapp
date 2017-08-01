@@ -15,7 +15,6 @@ import android.widget.Toast;
 import com.linkedin.platform.LISessionManager;
 
 import app.anish.com.tapp.R;
-import app.anish.com.tapp.linkedin_auth.LinkedInLoginFlow;
 import app.anish.com.tapp.linkedin_auth.LinkedInLoginFlow.FlowCompletionListener;
 import app.anish.com.tapp.linkedin_auth.LinkedInAppLoginFlow;
 import app.anish.com.tapp.linkedin_auth.LinkedInWebLoginFlow;
@@ -93,13 +92,11 @@ public class LinkedinDialogFragment extends Fragment implements View.OnClickList
     private void loginToLinkedIn() {
         toggleProgressBar(true);
 
-       /* if (PackageUtils.isPackageInstalled(getContext(), LINKEDIN_APP_PACKAGE_NAME)) {
+        if (PackageUtils.isPackageInstalled(getContext(), LINKEDIN_APP_PACKAGE_NAME)) {
             getLinkedInInfoThroughApp();
         } else {
             getLinkedInInfoThroughWeb();
-        }*/
-
-        getLinkedInInfoThroughWeb();
+        }
     }
 
     private void getLinkedInInfoThroughApp() {
@@ -152,13 +149,14 @@ public class LinkedinDialogFragment extends Fragment implements View.OnClickList
 
         @Override
         public void onSuccess() {
+            Toast.makeText(context, "Successfully logged into LinkedIn", Toast.LENGTH_SHORT).show();
             toggleLoginButton(true);
             toggleProgressBar(false);
         }
 
         @Override
         public void onFailure(Throwable throwable) {
-            Toast.makeText(context, "Failed to login into Linkedin", Toast.LENGTH_SHORT).show();
+            Toast.makeText(context, "Failed to login into LinkedIn", Toast.LENGTH_SHORT).show();
             toggleProgressBar(false);
         }
     }

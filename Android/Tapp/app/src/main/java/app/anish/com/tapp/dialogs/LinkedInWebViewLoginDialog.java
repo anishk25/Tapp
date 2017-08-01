@@ -5,9 +5,9 @@ import android.app.Dialog;
 import android.app.ProgressDialog;
 import android.content.Context;
 import android.net.Uri;
-import android.os.AsyncTask;
 import android.os.Bundle;
-import android.text.TextUtils;
+import android.os.Handler;
+import android.os.Looper;
 import android.util.Log;
 import android.view.View;
 import android.view.Window;
@@ -19,15 +19,19 @@ import com.linkedin.platform.AccessToken;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import java.io.BufferedReader;
 import java.io.IOException;
-import java.io.InputStreamReader;
-import java.net.HttpURLConnection;
-import java.net.URL;
 import java.util.Calendar;
 
 import app.anish.com.tapp.R;
-import app.anish.com.tapp.utils.HttpUtils;
+import app.anish.com.tapp.retrofit.LinkedInAuthEndpoint;
+import app.anish.com.tapp.retrofit.LinkedInWebToken;
+import okhttp3.HttpUrl;
+
+import retrofit2.Response;
+import retrofit2.Call;
+import retrofit2.Callback;
+import retrofit2.Retrofit;
+import retrofit2.converter.gson.GsonConverterFactory;
 
 
 /**
@@ -50,24 +54,22 @@ public class LinkedInWebViewLoginDialog extends Dialog {
 
     // Constants to build URLS
     private static final String AUTHORIZATION_URL = "https://www.linkedin.com/uas/oauth2/authorization";
-    private static final String ACCESS_TOKEN_URL = "https://www.linkedin.com/uas/oauth2/accessToken";
-    private static final String SECRET_KEY_PARAM = "client_secret";
+    private static final String ACCESS_TOKEN_URL = "https://www.linkedin.com/uas/oauth2/";
     private static final String RESPONSE_TYPE_PARAM = "response_type";
-    private static final String GRANT_TYPE_PARAM = "grant_type";
     private static final String GRANT_TYPE = "authorization_code";
-    private static final String RESPONSE_TYPE_VALUE ="code";
+    private static final String RESPONSE_TYPE = "code";
+    private static final String AUTHORIZATION_CODE_PARAM = RESPONSE_TYPE;
     private static final String CLIENT_ID_PARAM = "client_id";
     private static final String STATE_PARAM = "state";
     private static final String REDIRECT_URI_PARAM = "redirect_uri";
 
 
-    private static final String QUESTION_MARK = "?";
-    private static final String AMPERSAND = "&";
-    private static final String EQUALS = "=";
+    private static final Retrofit retrofit = new Retrofit.Builder()
+            .baseUrl(ACCESS_TOKEN_URL)
+            .addConverterFactory(GsonConverterFactory.create())
+            .build();
 
-    private static final String TOKEN_VALUE_JSON_KEY = "access_token";
-    private static final String TOKEN_EXPIRE_JSON_KEY = "expires_in";
-
+    private static final LinkedInAuthEndpoint authEndpoint = retrofit.create(LinkedInAuthEndpoint.class);
 
     private ProgressDialog mProgressDialog;
     private AuthListener authListener;
@@ -102,44 +104,45 @@ public class LinkedInWebViewLoginDialog extends Dialog {
 
 
     /**
-     * Method that generates the url for get the access token from the Service
-     * @return Url
-     */
-    private static String getAccessTokenUrl(String authorizationToken) {
-        return TextUtils.join("",
-                new String [] {
-                        ACCESS_TOKEN_URL,QUESTION_MARK,GRANT_TYPE_PARAM,
-                        EQUALS, GRANT_TYPE, AMPERSAND, RESPONSE_TYPE_VALUE,
-                        EQUALS, authorizationToken, AMPERSAND, CLIENT_ID_PARAM,
-                        EQUALS, LINKEDIN_API_KEY, AMPERSAND, REDIRECT_URI_PARAM,
-                        EQUALS, REDIRECT_URI, AMPERSAND, SECRET_KEY_PARAM,EQUALS,
-                        LINKEDIN_SECRET_KEY
-                }
-                );
-    }
-
-    /**
      * Method that generates the url for get the authorization token from the Service
      * @return Url
      */
     private static String getAuthorizationUrl() {
-        return TextUtils.join("",
-                    new String [] {
-                            AUTHORIZATION_URL,QUESTION_MARK,RESPONSE_TYPE_PARAM,EQUALS,
-                            RESPONSE_TYPE_VALUE,AMPERSAND,CLIENT_ID_PARAM,EQUALS,LINKEDIN_API_KEY,
-                            AMPERSAND,STATE_PARAM,EQUALS,STATE, AMPERSAND, REDIRECT_URI_PARAM,
-                            EQUALS,REDIRECT_URI
-                    }
-                );
+
+        return HttpUrl
+                .parse(AUTHORIZATION_URL)
+                .newBuilder()
+                .addQueryParameter(RESPONSE_TYPE_PARAM, RESPONSE_TYPE)
+                .addQueryParameter(CLIENT_ID_PARAM, LINKEDIN_API_KEY)
+                .addQueryParameter(STATE_PARAM, STATE)
+                .addQueryParameter(REDIRECT_URI_PARAM, REDIRECT_URI)
+                .build()
+                .toString();
     }
 
-    private void dismissDialogInError(String errorMsg) {
+    private void dismissDialogInError(final String errorMsg) {
+//        new Handler(Looper.getMainLooper()).post(new Runnable() {
+//            @Override
+//            public void run() {
+//                Log.e(LOG_TAG, errorMsg);
+//                dismiss();
+//                authListener.onAuthError(errorMsg);
+//            }
+//        });
+
         Log.e(LOG_TAG, errorMsg);
         dismiss();
         authListener.onAuthError(errorMsg);
     }
 
-    private void dismissDialogInSuccess(AccessToken accessToken) {
+    private void dismissDialogInSuccess(final AccessToken accessToken) {
+//        new Handler(Looper.getMainLooper()).post(new Runnable() {
+//            @Override
+//            public void run() {
+//                dismiss();
+//                authListener.onAuthSuccess(accessToken);
+//            }
+//        });
         dismiss();
         authListener.onAuthSuccess(accessToken);
     }
@@ -167,17 +170,14 @@ public class LinkedInWebViewLoginDialog extends Dialog {
 
                 // If user doesn't allow authorization to our application,
                 // the authorizationToken will be null
-                String authorizationToken = uri.getQueryParameter(RESPONSE_TYPE_VALUE);
+                String authorizationToken = uri.getQueryParameter(AUTHORIZATION_CODE_PARAM);
                 if (authorizationToken == null) {
                     dismissDialogInError("The user didn't allow authorization");
                     return true;
                 }
 
                 Log.i(LOG_TAG, "Auth token received " + authorizationToken);
-                String accessTokenUrl = getAccessTokenUrl(authorizationToken);
-
-                // Make the request in an Async Task
-                new PostRequestAsyncTask().execute(accessTokenUrl);
+                makeTokenRequest(authorizationToken);
             } else {
                 // default behaviour
                 String url = uri.toString();
@@ -187,89 +187,51 @@ public class LinkedInWebViewLoginDialog extends Dialog {
 
             return true;
         }
-    }
 
-    private class PostRequestAsyncTask extends AsyncTask<String, Void, Throwable> {
+        private void makeTokenRequest(String authorizationToken) {
 
-        private volatile AccessToken accessToken;
-
-        @Override
-        protected void onPreExecute() {
-            if (mProgressDialog == null || !mProgressDialog.isShowing()) {
-                mProgressDialog = ProgressDialog.show(getContext(), "", getContext().getString(R.string.loading), true);
-            }
-        }
-
-        @Override
-        protected void onPostExecute(Throwable throwable) {
-            if (mProgressDialog != null && mProgressDialog.isShowing()) {
-                mProgressDialog.dismiss();
-            }
-
-            if (throwable != null) {
-                dismissDialogInError(throwable.getMessage());
-            } else {
-                dismissDialogInSuccess(accessToken);
-            }
-        }
-
-        @Override
-        protected Throwable doInBackground(String... urls) {
-            if (urls.length > 0) {
-                String url = urls[0];
-                try {
-                    accessToken = getLinkedinToken(url);
-                    Log.d("LINKEDIN TOKEN", "LinkedIn Token is " + accessToken.toString());
-                    return null;
-                } catch (IOException e) {
-                    return new Exception("Error Http response " + e.getLocalizedMessage());
-                } catch (JSONException e) {
-                    return new Exception("Error Parsing Http response " + e.getLocalizedMessage());
+            Call<LinkedInWebToken> call = authEndpoint.getToken(GRANT_TYPE, authorizationToken, REDIRECT_URI, LINKEDIN_API_KEY, LINKEDIN_SECRET_KEY);
+            call.enqueue(new Callback<LinkedInWebToken>() {
+                @Override
+                public void onResponse(Call<LinkedInWebToken> call, Response<LinkedInWebToken> response) {
+                    if (response.isSuccessful()) {
+                        processResponseSuccess(response);
+                    } else {
+                        processResponseFailure(response);
+                    }
                 }
+
+                @Override
+                public void onFailure(Call<LinkedInWebToken> call, Throwable t) {
+                    dismissDialogInError(t.getMessage());
+                }
+            });
+        }
+
+        private void processResponseSuccess(Response<LinkedInWebToken> response) {
+            try {
+                dismissDialogInSuccess(getAccessToken(response.body()));
+            } catch (JSONException e) {
+                dismissDialogInError(e.getMessage());
             }
-
-            return new Exception("No urls provided to task");
         }
 
-        /**
-         * Extracts token from URL and saves it to Shared Preferences
-         * @param url
-         */
-        private AccessToken getLinkedinToken (String url) throws IOException, JSONException{
-            JSONObject webJSON = getLinkedInJSONToken(url);
-            JSONObject sessionJSON = getSessionJSON(webJSON);
-            return AccessToken.buildAccessToken(sessionJSON);
-        }
-
-        /**
-         * Retrieves the LinkedIn Token stored in the URL
-         * @param url
-         * @return {@link JSONObject} containing the token information
-         * @throws IOException
-         * @throws JSONException
-         */
-        private JSONObject getLinkedInJSONToken (String url) throws IOException, JSONException {
-            URL urlObj = new URL(url);
-            HttpURLConnection urlConnection = (HttpURLConnection) urlObj.openConnection();
-            urlConnection.setRequestMethod("POST");
-
-            int responseCode = urlConnection.getResponseCode();
-
-            if (responseCode == 200) {
-                String response = HttpUtils.getResponseString(urlConnection);
-                return new JSONObject(response);
+        private void processResponseFailure(Response<LinkedInWebToken> response) {
+            String errorMsg = "Error making token request";
+            try {
+                errorMsg += " Error: " + response.errorBody().string();
+            } catch (IOException e) {
+                e.printStackTrace();
             }
-
-            return null;
+            dismissDialogInError(errorMsg);
         }
 
         /**
-         * converts the JSON object received from the web
-         * to a JSON object to be used to build {@link com.linkedin.platform.AccessToken}
-         * @param webJson
+         * converts the webToken parameter to {@link AccessToken}
+         * @param webToken
          * @return {@link JSONObject}
          */
-        private JSONObject getSessionJSON(JSONObject webJson) throws JSONException {
+        private AccessToken getAccessToken (LinkedInWebToken webToken) throws JSONException {
             JSONObject jsonObject = new JSONObject();
 
             //Calculate date of expiration, the expiration value
@@ -277,15 +239,14 @@ public class LinkedInWebViewLoginDialog extends Dialog {
             // seconds the token will expire from the time it was
             // retrieved
             Calendar calendar = Calendar.getInstance();
-            calendar.add(Calendar.SECOND, (Integer) webJson.get(TOKEN_EXPIRE_JSON_KEY));
+            calendar.add(Calendar.SECOND, webToken.getExpirationInSec());
             String expireDateInMs = Long.toString(calendar.getTimeInMillis());
 
-            jsonObject.put(AccessToken.ACCESS_TOKEN_VALUE, webJson.get(TOKEN_VALUE_JSON_KEY));
+            jsonObject.put(AccessToken.ACCESS_TOKEN_VALUE, webToken.getTokenValue());
             jsonObject.put(AccessToken.EXPIRES_ON, expireDateInMs);
-            return jsonObject;
+            return AccessToken.buildAccessToken(jsonObject);
         }
     }
-
 
     public interface AuthListener {
         void onAuthSuccess(AccessToken accessToken);;

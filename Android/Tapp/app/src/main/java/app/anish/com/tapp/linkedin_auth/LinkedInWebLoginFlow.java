@@ -11,17 +11,36 @@ import com.linkedin.platform.AccessToken;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.io.IOException;
 import java.net.HttpURLConnection;
 import java.net.URL;
 
 import app.anish.com.tapp.dialogs.LinkedInWebViewLoginDialog;
+import app.anish.com.tapp.retrofit.LinkedInBasicProfileData;
+import app.anish.com.tapp.retrofit.LinkedInInfoEndpoint;
+import app.anish.com.tapp.shared_prefs.SecuredSharedPrefs;
+import app.anish.com.tapp.shared_prefs.SettingsInfo;
+import app.anish.com.tapp.utils.AppConstants;
 import app.anish.com.tapp.utils.HttpUtils;
+import app.anish.com.tapp.utils.SharedPrefsUtils;
+import retrofit2.Call;
+import retrofit2.Callback;
+import retrofit2.Response;
+import retrofit2.Retrofit;
+import retrofit2.converter.gson.GsonConverterFactory;
 
 /**
  * Login flow through through Web Dialog
  */
 
 public final class LinkedInWebLoginFlow extends LinkedInLoginFlow {
+
+    private static final Retrofit retrofit = new Retrofit.Builder()
+            .baseUrl("https://api.linkedin.com/v1/people/")
+            .addConverterFactory(GsonConverterFactory.create())
+            .build();
+
+    private static final LinkedInInfoEndpoint infoEndpoint = retrofit.create(LinkedInInfoEndpoint.class);
 
     private Context context;
     private FlowCompletionListener listener;
@@ -52,41 +71,40 @@ public final class LinkedInWebLoginFlow extends LinkedInLoginFlow {
     }
 
     private void getUserInfo(final AccessToken accessToken) {
-        AsyncTask<String, Void, JSONObject> asyncTask = new AsyncTask<String, Void, JSONObject>() {
+
+        Call<LinkedInBasicProfileData> call = infoEndpoint.getBasicProfileData("Bearer " + accessToken.getValue());
+        call.enqueue(new Callback<LinkedInBasicProfileData>() {
             @Override
-            protected JSONObject doInBackground(String... strings) {
+            public void onResponse(Call<LinkedInBasicProfileData> call, Response<LinkedInBasicProfileData> response) {
+                if (response.isSuccessful()) {
+                    saveLinkedInInfo(response.body());
+                    listener.onSuccess();
+                } else {
+                    processResponseFailure(response);
+                }
+            }
+
+            @Override
+            public void onFailure(Call<LinkedInBasicProfileData> call, Throwable t) {
+                listener.onFailure(t);
+            }
+
+
+            private void processResponseFailure(Response<LinkedInBasicProfileData> response) {
+                String errorMsg = "Unable to retrieve profile data";
                 try {
-                    URL url = new URL(strings[0]);
-                    HttpURLConnection connection = (HttpURLConnection) url.openConnection();
-                    connection.addRequestProperty("Authorization", "Bearer " + accessToken.getValue());
-                    connection.setRequestMethod("GET");
-                    int responseCode = connection.getResponseCode();
-
-                    if (responseCode == 200) {
-                        String responseString = HttpUtils.getResponseString(connection);
-                        JSONObject jsonObject =  new JSONObject(responseString);
-                        return jsonObject;
-                    }
-                } catch (Exception e) {
-                    Toast.makeText(context, "Error getting response from LinkedIn Web API", Toast.LENGTH_LONG).show();
+                    errorMsg += " Error: " + response.errorBody().string();
+                } catch (IOException e) {
+                    e.printStackTrace();
                 }
-                return null;
+                listener.onFailure(new Exception(errorMsg));
             }
-            @Override
-            protected void onPostExecute(JSONObject jsonObject) {
-                if (jsonObject != null) {
-                    try {
-                        saveLinkedInInfo(jsonObject, context);
-                        listener.onSuccess();
-                    } catch (JSONException e) {
-                        Toast.makeText(context, "Error parsing information retrieved from LinkedIn", Toast.LENGTH_LONG).show();
-                        listener.onFailure(e);
-                    }
-                }
-            }
-        };
+        });
+    }
 
-        String url = "https://api.linkedin.com/v1/people/~?format=json";
-        asyncTask.execute(url);
+    private void saveLinkedInInfo(LinkedInBasicProfileData profileData) {
+        SharedPrefsUtils.saveString(context, AppConstants.SETTINGS_SHARED_PREFS_KEY, SecuredSharedPrefs.LINKEDIN_ID.getInfoPrefKey(), profileData.getId());
+        SharedPrefsUtils.saveString(context, AppConstants.SETTINGS_SHARED_PREFS_KEY, SettingsInfo.LINKEDIN_NAME.getInfoPrefKey(),
+                profileData.getFirstName() + " " + profileData.getLastName());
     }
 }
