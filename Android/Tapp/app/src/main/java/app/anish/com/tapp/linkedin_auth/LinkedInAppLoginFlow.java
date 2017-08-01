@@ -18,7 +18,6 @@ import org.json.JSONObject;
 
 import app.anish.com.tapp.shared_prefs.SecuredSharedPrefs;
 import app.anish.com.tapp.shared_prefs.SettingsInfo;
-import app.anish.com.tapp.utils.AppConstants;
 import app.anish.com.tapp.utils.SharedPrefsUtils;
 
 /**
@@ -86,8 +85,8 @@ public final class LinkedInAppLoginFlow extends LinkedInLoginFlow {
         String linkedInId = jsonObject.getString("id");
         String firstName = jsonObject.getString("firstName");
         String lastName = jsonObject.getString("lastName");
-        SharedPrefsUtils.saveString(context, AppConstants.SETTINGS_SHARED_PREFS_KEY, SecuredSharedPrefs.LINKEDIN_ID.getInfoPrefKey(), linkedInId);
-        SharedPrefsUtils.saveString(context, AppConstants.SETTINGS_SHARED_PREFS_KEY, SettingsInfo.LINKEDIN_NAME.getInfoPrefKey(),
+        SharedPrefsUtils.saveString(context, SharedPrefsUtils.SETTINGS_SHARED_PREFS_KEY, SecuredSharedPrefs.LINKEDIN_ID.getInfoPrefKey(), linkedInId);
+        SharedPrefsUtils.saveString(context, SharedPrefsUtils.SETTINGS_SHARED_PREFS_KEY, SettingsInfo.LINKEDIN_NAME.getInfoPrefKey(),
                 firstName + " " + lastName);
     }
 }

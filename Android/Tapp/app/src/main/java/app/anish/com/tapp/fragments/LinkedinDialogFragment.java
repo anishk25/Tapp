@@ -23,7 +23,6 @@ import app.anish.com.tapp.shared_prefs.SettingsInfo;
 import app.anish.com.tapp.shared_prefs.Token;
 import app.anish.com.tapp.utils.PackageUtils;
 import app.anish.com.tapp.utils.SharedPrefsUtils;
-import app.anish.com.tapp.utils.AppConstants;
 
 
 /**
@@ -85,7 +84,7 @@ public class LinkedinDialogFragment extends Fragment implements View.OnClickList
     }
 
     private void initInitialButtonState() {
-        String linkedInId = SharedPrefsUtils.getString(context, AppConstants.SETTINGS_SHARED_PREFS_KEY, SecuredSharedPrefs.LINKEDIN_ID.toString());
+        String linkedInId = SharedPrefsUtils.getString(context, SharedPrefsUtils.SETTINGS_SHARED_PREFS_KEY, SecuredSharedPrefs.LINKEDIN_ID.toString());
         toggleLoginButton(linkedInId != null);
     }
 
@@ -130,9 +129,9 @@ public class LinkedinDialogFragment extends Fragment implements View.OnClickList
 
     private void logoutOfLinkedIn() {
         // remove the linkedin id and access token from shared preferences
-        SharedPrefsUtils.deleteKey(context, AppConstants.SETTINGS_SHARED_PREFS_KEY, Token.LINKEDIN.toString());
-        SharedPrefsUtils.deleteKey(context, AppConstants.SETTINGS_SHARED_PREFS_KEY, SecuredSharedPrefs.LINKEDIN_ID.getInfoPrefKey());
-        SharedPrefsUtils.deleteKey(context, AppConstants.SETTINGS_SHARED_PREFS_KEY, SettingsInfo.LINKEDIN_NAME.getInfoPrefKey());
+        SharedPrefsUtils.deleteKey(context, SharedPrefsUtils.SETTINGS_SHARED_PREFS_KEY, Token.LINKEDIN.toString());
+        SharedPrefsUtils.deleteKey(context, SharedPrefsUtils.SETTINGS_SHARED_PREFS_KEY, SecuredSharedPrefs.LINKEDIN_ID.getInfoPrefKey());
+        SharedPrefsUtils.deleteKey(context, SharedPrefsUtils.SETTINGS_SHARED_PREFS_KEY, SettingsInfo.LINKEDIN_NAME.getInfoPrefKey());
         toggleLoginButton(false);
     }
 

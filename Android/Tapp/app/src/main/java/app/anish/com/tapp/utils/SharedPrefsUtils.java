@@ -11,6 +11,8 @@ import android.content.SharedPreferences;
 
 public final class SharedPrefsUtils {
 
+    public static final String SETTINGS_SHARED_PREFS_KEY = "SETTINGS";
+
     public static String getString(Context context, String prefsKey, String valueKey) {
         SharedPreferences sharedPref = context.getSharedPreferences(prefsKey, Context.MODE_PRIVATE);
         return sharedPref.getString(valueKey, null);

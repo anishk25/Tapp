@@ -2,26 +2,17 @@ package app.anish.com.tapp.linkedin_auth;
 
 import android.app.Dialog;
 import android.content.Context;
-import android.os.AsyncTask;
 import android.util.DisplayMetrics;
-import android.widget.Toast;
 
 import com.linkedin.platform.AccessToken;
 
-import org.json.JSONException;
-import org.json.JSONObject;
-
 import java.io.IOException;
-import java.net.HttpURLConnection;
-import java.net.URL;
 
 import app.anish.com.tapp.dialogs.LinkedInWebViewLoginDialog;
 import app.anish.com.tapp.retrofit.LinkedInBasicProfileData;
 import app.anish.com.tapp.retrofit.LinkedInInfoEndpoint;
 import app.anish.com.tapp.shared_prefs.SecuredSharedPrefs;
 import app.anish.com.tapp.shared_prefs.SettingsInfo;
-import app.anish.com.tapp.utils.AppConstants;
-import app.anish.com.tapp.utils.HttpUtils;
 import app.anish.com.tapp.utils.SharedPrefsUtils;
 import retrofit2.Call;
 import retrofit2.Callback;
@@ -103,8 +94,8 @@ public final class LinkedInWebLoginFlow extends LinkedInLoginFlow {
     }
 
     private void saveLinkedInInfo(LinkedInBasicProfileData profileData) {
-        SharedPrefsUtils.saveString(context, AppConstants.SETTINGS_SHARED_PREFS_KEY, SecuredSharedPrefs.LINKEDIN_ID.getInfoPrefKey(), profileData.getId());
-        SharedPrefsUtils.saveString(context, AppConstants.SETTINGS_SHARED_PREFS_KEY, SettingsInfo.LINKEDIN_NAME.getInfoPrefKey(),
+        SharedPrefsUtils.saveString(context, SharedPrefsUtils.SETTINGS_SHARED_PREFS_KEY, SecuredSharedPrefs.LINKEDIN_ID.getInfoPrefKey(), profileData.getId());
+        SharedPrefsUtils.saveString(context, SharedPrefsUtils.SETTINGS_SHARED_PREFS_KEY, SettingsInfo.LINKEDIN_NAME.getInfoPrefKey(),
                 profileData.getFirstName() + " " + profileData.getLastName());
     }
 }

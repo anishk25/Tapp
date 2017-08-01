@@ -18,7 +18,6 @@ import java.util.ArrayList;
 
 import app.anish.com.tapp.R;
 import app.anish.com.tapp.shared_prefs.SettingsInfo;
-import app.anish.com.tapp.utils.AppConstants;
 import app.anish.com.tapp.utils.SharedPrefsUtils;
 
 /**
@@ -72,7 +71,7 @@ public class SettingsListViewAdapter extends ArrayAdapter<SettingsInfo> {
         String title = settingsInfo.getTitle();
         String details = getDetailDispString(settingsInfo);
         boolean share = SharedPrefsUtils.getBoolean(mContext,
-                AppConstants.SETTINGS_SHARED_PREFS_KEY, settingsInfo.getShareInfoPrefKey());
+                SharedPrefsUtils.SETTINGS_SHARED_PREFS_KEY, settingsInfo.getShareInfoPrefKey());
 
         viewHolder.tvTitle.setText(title);
         viewHolder.tvDetails.setText(details);
@@ -114,11 +113,11 @@ public class SettingsListViewAdapter extends ArrayAdapter<SettingsInfo> {
             @Override
             public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
                 // check if data is present in shared pref
-                if(isChecked && SharedPrefsUtils.getString(mContext, AppConstants.SETTINGS_SHARED_PREFS_KEY, settingsInfo.getInfoPrefKey()) == null) {
+                if(isChecked && SharedPrefsUtils.getString(mContext, SharedPrefsUtils.SETTINGS_SHARED_PREFS_KEY, settingsInfo.getInfoPrefKey()) == null) {
                     checkBox.setChecked(false);
                     Toast.makeText(mContext, "Property must be set before enabling share", Toast.LENGTH_LONG).show();
                 } else {
-                    SharedPrefsUtils.saveBoolean(mContext, AppConstants.SETTINGS_SHARED_PREFS_KEY,
+                    SharedPrefsUtils.saveBoolean(mContext, SharedPrefsUtils.SETTINGS_SHARED_PREFS_KEY,
                             settingsInfo.getShareInfoPrefKey(), isChecked);
                 }
             }
@@ -129,7 +128,7 @@ public class SettingsListViewAdapter extends ArrayAdapter<SettingsInfo> {
 
     private String getDetailDispString(SettingsInfo settingsInfo) {
         String prefix = settingsInfo.getInfoPrefix();
-        String details = SharedPrefsUtils.getString(mContext, AppConstants.SETTINGS_SHARED_PREFS_KEY,
+        String details = SharedPrefsUtils.getString(mContext, SharedPrefsUtils.SETTINGS_SHARED_PREFS_KEY,
                 settingsInfo.getInfoPrefKey());
         return details == null ? "Not Set" : prefix + details;
     }
