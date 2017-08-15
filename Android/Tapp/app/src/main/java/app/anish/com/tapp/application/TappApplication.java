@@ -13,6 +13,7 @@ public class TappApplication extends Application {
     @Override
     public void onCreate() {
         super.onCreate();
-        TappSharedPreferences.init(getApplicationContext());
+        // initialize shared preferences at start of activity
+        TappSharedPreferences.getInstance(getApplicationContext());
     }
 }

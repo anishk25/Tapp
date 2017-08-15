@@ -19,8 +19,6 @@ import com.linkedin.platform.errors.LIAuthError;
 import com.linkedin.platform.listeners.AuthListener;
 import com.linkedin.platform.utils.Scope;
 
-import java.util.HashMap;
-import java.util.Map;
 import java.util.Observable;
 import java.util.Observer;
 
@@ -31,8 +29,6 @@ import app.anish.com.tapp.shared_prefs.SecuredSharedPrefs;
 import app.anish.com.tapp.shared_prefs.SettingsInfo;
 import app.anish.com.tapp.shared_prefs.TappSharedPreferences;
 import app.anish.com.tapp.shared_prefs.Token;
-import app.anish.com.tapp.utils.PackageUtils;
-import app.anish.com.tapp.utils.SharedPrefsUtils;
 
 
 /**
@@ -44,12 +40,13 @@ import app.anish.com.tapp.utils.SharedPrefsUtils;
 public class LinkedInDialogFragment extends Fragment implements View.OnClickListener, Observer {
 
     private static final String LINKEDIN_APP_PACKAGE_NAME = "com.linkedin.android";
+
     private static final TappSharedPreferences sharedPrefs = TappSharedPreferences.getInstance();
+    public static final String LINKEDIN_LOGIN_STATUS_PREF_KEY = "linkedInLoginState";
 
     private Button loginButton;
     private ProgressBar progressBar;
     private Context context;
-    private LoginState loginState = LoginState.WAITING;
 
 
     @Override
@@ -73,7 +70,7 @@ public class LinkedInDialogFragment extends Fragment implements View.OnClickList
     @Override
     public void onResume() {
         super.onResume();
-        checkLinkedInResults();
+        sharedPrefs.addObserver(this);
     }
 
     @Nullable
@@ -111,14 +108,12 @@ public class LinkedInDialogFragment extends Fragment implements View.OnClickList
     }
 
     private void initInitialButtonState() {
-        String linkedInId = SharedPrefsUtils.getString(context, SharedPrefsUtils.SETTINGS_SHARED_PREFS_KEY, SecuredSharedPrefs.LINKEDIN_ID.toString());
+        String linkedInId = sharedPrefs.getString(SecuredSharedPrefs.LINKEDIN_ID.toString());
         toggleLoginButton(linkedInId != null);
     }
 
     private void loginToLinkedIn() {
         toggleProgressBar(true);
-        loginState = LoginState.BEGUN;
-
 //        if (PackageUtils.isPackageInstalled(getContext(), LINKEDIN_APP_PACKAGE_NAME)) {
 //            getLinkedInInfoThroughApp();
 //        } else {
@@ -171,45 +166,29 @@ public class LinkedInDialogFragment extends Fragment implements View.OnClickList
 
     private void logoutOfLinkedIn() {
         // remove the linkedin id and access token from shared preferences
-        SharedPrefsUtils.deleteKey(context, SharedPrefsUtils.SETTINGS_SHARED_PREFS_KEY, Token.LINKEDIN.toString());
-        SharedPrefsUtils.deleteKey(context, SharedPrefsUtils.SETTINGS_SHARED_PREFS_KEY, SecuredSharedPrefs.LINKEDIN_ID.getInfoPrefKey());
-        SharedPrefsUtils.deleteKey(context, SharedPrefsUtils.SETTINGS_SHARED_PREFS_KEY, SettingsInfo.LINKEDIN_NAME.getInfoPrefKey());
+        sharedPrefs.deleteKey(SecuredSharedPrefs.LINKEDIN_ID.getInfoPrefKey());
+        sharedPrefs.deleteKey(SettingsInfo.LINKEDIN_NAME.getInfoPrefKey());
+        sharedPrefs.deleteKey(SecuredSharedPrefs.LINKEDIN_WEB_TOKEN.getInfoPrefKey());
         toggleLoginButton(false);
     }
 
-    private void checkLinkedInResults() {
-        if (loginState != LoginState.BEGUN) {
-            return;
-        }
-
-        Map<String, String> prefsResultsMap = new HashMap<>();
-        prefsResultsMap.put(SecuredSharedPrefs.LINKEDIN_WEB_TOKEN.getInfoPrefKey(),sharedPrefs.getString(SecuredSharedPrefs.LINKEDIN_WEB_TOKEN.getInfoPrefKey()));
-        prefsResultsMap.put(SecuredSharedPrefs.LINKEDIN_ID.getInfoPrefKey(), sharedPrefs.getString(SecuredSharedPrefs.LINKEDIN_ID.getInfoPrefKey()));
-        boolean errorFound = false;
-
-        for (Map.Entry<String, String> entry : prefsResultsMap.entrySet()) {
-            if(TappSharedPreferences.ERRROR_VALUE.equals(entry.getValue()) && entry.getValue() != null) {
-                displayResultErrorMsg(entry.getKey());
-                sharedPrefs.deleteKey(entry.getKey());
-                errorFound = true;
+    private void processLoginResult() {
+        String result = sharedPrefs.getString(LINKEDIN_LOGIN_STATUS_PREF_KEY);
+        if (result != null) {
+            LoginState loginState = LoginState.valueOf(sharedPrefs.getString(LINKEDIN_LOGIN_STATUS_PREF_KEY));
+            switch (loginState) {
+                case DONE:
+                    Toast.makeText(context, "Successfully logged into LinkedIn", Toast.LENGTH_LONG).show();
+                    toggleLoginButton(true);
+                    break;
+                case ERROR:
+                    Toast.makeText(context, "Error logging into LinkedIn. Please try again", Toast.LENGTH_LONG).show();
+                    toggleLoginButton(false);
+                    break;
             }
+            toggleProgressBar(false);
+            sharedPrefs.deleteKey(LINKEDIN_LOGIN_STATUS_PREF_KEY);
         }
-
-        updateLoginUi(!errorFound);
-    }
-
-    private void displayResultErrorMsg(String prefsKey) {
-        if (prefsKey.equals(SecuredSharedPrefs.LINKEDIN_WEB_TOKEN.getInfoPrefKey())) {
-            Toast.makeText(context, "Error authorizing user", Toast.LENGTH_LONG).show();
-        } else if (prefsKey.equals(SecuredSharedPrefs.LINKEDIN_ID.getInfoPrefKey())) {
-            Toast.makeText(context, "Error retriving user information from LinkedIn", Toast.LENGTH_LONG).show();
-        }
-    }
-
-    private void updateLoginUi(boolean loggedIn) {
-        toggleProgressBar(false);
-        loginState = LoginState.DONE;
-        toggleLoginButton(loggedIn);
     }
 
     @Override
@@ -225,19 +204,19 @@ public class LinkedInDialogFragment extends Fragment implements View.OnClickList
     public void update(Observable observable, Object arg) {
         if (observable instanceof TappSharedPreferences) {
             String key = (String) arg;
-            String value = sharedPrefs.getString(key);
-            if (TappSharedPreferences.ERRROR_VALUE.equals(value)) {
-                displayResultErrorMsg(key);
-                updateLoginUi(false);
-            } else {
-                updateLoginUi(true);
+            if (LINKEDIN_LOGIN_STATUS_PREF_KEY.equals(key)) {
+                getActivity().runOnUiThread(new Runnable() {
+                    @Override
+                    public void run() {
+                        processLoginResult();
+                    }
+                });
             }
         }
     }
 
-    private enum LoginState {
-        WAITING,
-        BEGUN,
-        DONE
+    public enum LoginState {
+        DONE,
+        ERROR
     }
 }

@@ -10,7 +10,6 @@ import com.linkedin.platform.AccessToken;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import java.io.IOException;
 import java.util.Calendar;
 
 import app.anish.com.tapp.BuildConfig;
@@ -27,6 +26,9 @@ import retrofit2.Response;
 import retrofit2.Retrofit;
 import retrofit2.converter.gson.GsonConverterFactory;
 
+import static app.anish.com.tapp.fragments.LinkedInDialogFragment.LINKEDIN_LOGIN_STATUS_PREF_KEY;
+import static app.anish.com.tapp.fragments.LinkedInDialogFragment.LoginState;
+
 /**
  * Service for retrieving user LinkedIn information through
  * the LinkedIn Web Api
@@ -38,8 +40,8 @@ public class LinkedInWebCredRetrieverService extends IntentService {
     public static final String LINKEDIN_AUTHORIZATION_TOKEN_KEY = "authorization_token";
 
     private static final String GRANT_TYPE = "authorization_code";
-
     private static final TappSharedPreferences sharedPrefs = TappSharedPreferences.getInstance();
+    private static final String LOG_TAG = LinkedInWebCredRetrieverService.class.getName();
 
     private static final LinkedInAuthEndpoint authEndpoint =
             new Retrofit.Builder()
@@ -50,10 +52,10 @@ public class LinkedInWebCredRetrieverService extends IntentService {
 
     private static final LinkedInInfoEndpoint infoEndpoint =
             new Retrofit.Builder()
-                .baseUrl("https://api.linkedin.com/v1/people/")
-                .addConverterFactory(GsonConverterFactory.create())
-                .build()
-                .create(LinkedInInfoEndpoint.class);
+                    .baseUrl("https://api.linkedin.com/v1/people/")
+                    .addConverterFactory(GsonConverterFactory.create())
+                    .build()
+                    .create(LinkedInInfoEndpoint.class);
 
     public LinkedInWebCredRetrieverService() {
         super(LinkedInWebCredRetrieverService.class.getSimpleName());
@@ -68,28 +70,46 @@ public class LinkedInWebCredRetrieverService extends IntentService {
     private void startUserInfoRetrieval(String authToken) {
         Call<LinkedInWebToken> call = authEndpoint.getToken(GRANT_TYPE, authToken,
                 LinkedInWebViewLoginDialog.REDIRECT_URI, BuildConfig.LINKEDIN_API_KEY, BuildConfig.LINKEDIN_SECRET_KEY);
-
         try {
-            // TODO: check if response is successful or not
-            LinkedInWebToken linkedInWebToken = call.execute().body();
-            AccessToken accessToken = getAccessToken(linkedInWebToken);
-            sharedPrefs.saveString(SecuredSharedPrefs.LINKEDIN_WEB_TOKEN.getInfoPrefKey(), accessToken.toString());
-            getUserInfo(accessToken);
-        } catch (IOException | JSONException e) {
-            sharedPrefs.saveString(SecuredSharedPrefs.LINKEDIN_WEB_TOKEN.getInfoPrefKey(), TappSharedPreferences.ERRROR_VALUE);
+            Response<LinkedInWebToken> response = call.execute();
+            if (response != null && response.isSuccessful()) {
+                LinkedInWebToken linkedInWebToken = response.body();
+                if (linkedInWebToken != null) {
+                    AccessToken accessToken = getAccessToken(linkedInWebToken);
+                    getUserInfo(accessToken);
+                } else {
+                    throw new Exception("LinkedIn Web token retrieved from response is null");
+                }
+            } else {
+                throw new Exception("Error getting LinkedIn Web Token response " + getResponseErrorString(response));
+            }
+        } catch (Exception e) {
+            Log.d(LOG_TAG, "Error getting LinkedIn Web Token. Exception : " + e.getMessage());
+            sharedPrefs.saveString(LINKEDIN_LOGIN_STATUS_PREF_KEY, LoginState.ERROR.toString());
         }
     }
 
     private void getUserInfo(AccessToken accessToken) {
         Call<LinkedInBasicProfileData> call = infoEndpoint.getBasicProfileData("Bearer " + accessToken.getValue());
         try {
-            // TODO: check if response is successful or not
-            LinkedInBasicProfileData data = call.execute().body();
-            sharedPrefs.saveString(SecuredSharedPrefs.LINKEDIN_ID.getInfoPrefKey(), data.getId());
-            sharedPrefs.saveString(SettingsInfo.LINKEDIN_NAME.getInfoPrefKey(), data.getFirstName() + " " + data.getLastName());
-        } catch (IOException e) {
-            sharedPrefs.saveString(SecuredSharedPrefs.LINKEDIN_ID.getInfoPrefKey(), TappSharedPreferences.ERRROR_VALUE);
+            Response<LinkedInBasicProfileData> response = call.execute();
+            if (response != null && response.isSuccessful()) {
+                LinkedInBasicProfileData data = response.body();
+                if (data != null) {
+                    sharedPrefs.saveString(SecuredSharedPrefs.LINKEDIN_WEB_TOKEN.getInfoPrefKey(), accessToken.toString());
+                    sharedPrefs.saveString(SecuredSharedPrefs.LINKEDIN_ID.getInfoPrefKey(), data.getId());
+                    sharedPrefs.saveString(SettingsInfo.LINKEDIN_NAME.getInfoPrefKey(), data.getFirstName() + " " + data.getLastName());
+                } else {
+                    throw new Exception("Profile data received from response is null");
+                }
+            } else {
+                throw new Exception("Error getting profile data response " + getResponseErrorString(response));
+            }
+        } catch (Exception e) {
+            Log.d(LOG_TAG, "Error getting profile data. Exception : " + e.getMessage());
+            sharedPrefs.saveString(LINKEDIN_LOGIN_STATUS_PREF_KEY, LoginState.ERROR.toString());
         }
+        sharedPrefs.saveString(LINKEDIN_LOGIN_STATUS_PREF_KEY, LoginState.DONE.toString());
     }
 
     /**
@@ -111,5 +131,9 @@ public class LinkedInWebCredRetrieverService extends IntentService {
         jsonObject.put(AccessToken.ACCESS_TOKEN_VALUE, webToken.getTokenValue());
         jsonObject.put(AccessToken.EXPIRES_ON, expireDateInMs);
         return AccessToken.buildAccessToken(jsonObject);
+    }
+
+    private <T> String getResponseErrorString(Response<T> response) {
+        return response == null ? "Response is null" : "Error Code: " + response.code();
     }
 }

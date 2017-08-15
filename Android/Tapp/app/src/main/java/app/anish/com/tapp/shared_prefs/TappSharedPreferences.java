@@ -3,7 +3,9 @@ package app.anish.com.tapp.shared_prefs;
 import android.content.Context;
 import android.content.SharedPreferences;
 
+import java.util.LinkedList;
 import java.util.Observable;
+import java.util.Queue;
 
 /**
  * Singleton class to represent Shared Preferences in the app
@@ -12,62 +14,94 @@ import java.util.Observable;
 
 public final class TappSharedPreferences extends Observable {
 
-    public static final String ERRROR_VALUE = "error";
-
     private static TappSharedPreferences tappSharedPreferences;
-    private static SharedPreferences sharedPreferences;
-    private static SharedPreferences.Editor editor;
+    private  SharedPreferences mSharedPreferences;
+    private  SharedPreferences.Editor mEditor;
+    private boolean mBulkUpdate = false;
+    private LinkedList<String> bulkEditKeyQueue = new LinkedList<>();
 
-    private TappSharedPreferences () {}
 
-    public static TappSharedPreferences getInstance() {
+    private TappSharedPreferences (Context context) {
+        mSharedPreferences = context.getSharedPreferences(context.getPackageName(), Context.MODE_PRIVATE);
+    }
+
+    public static TappSharedPreferences getInstance(Context context) {
         if (tappSharedPreferences == null) {
-            throw new RuntimeException("Need to call init before getting an instance of TappSharedPreferences");
+            tappSharedPreferences = new TappSharedPreferences(context);
         }
         return tappSharedPreferences;
     }
 
-    public static void init(Context context) {
-        if (tappSharedPreferences == null) {
-            tappSharedPreferences = new TappSharedPreferences();
-            sharedPreferences = context.getSharedPreferences(context.getPackageName(), Context.MODE_PRIVATE);
-            editor = sharedPreferences.edit();
-        }
-    }
-
     public void saveString(String key, String value) {
-        if (!getString(key).equals(value)) {
-            editor.putString(key, value);
-            editor.commit();
-            notifyPrefsObervers(key);
+        if (!value.equals(getString(key))) {
+            doEdit(key);
+            mEditor.putString(key, value);
+            doCommit(key);
         }
     }
 
     public String getString(String key) {
-        return sharedPreferences.getString(key, null);
-    }
-
-    public void deleteKey(String key) {
-        editor.remove(key);
-        editor.commit();
+        return mSharedPreferences.getString(key, null);
     }
 
 
     public void saveBoolean(String key, boolean value) {
         if (getBoolean(key) != value) {
-            editor.putBoolean(key, value);
-            editor.commit();
-            notifyPrefsObervers(key);
+            doEdit(key);
+            mEditor.putBoolean(key, value);
+            notifyPrefsObservers(key);
         }
     }
 
-    public boolean getBoolean(String key) {
-        return sharedPreferences.getBoolean(key, false);
+    public void deleteKey(String key) {
+        doEdit(key);
+        mEditor.remove(key);
+        doCommit(key);
     }
 
-    private void notifyPrefsObervers(String sharedPrefKey) {
+    public boolean getBoolean(String key) {
+        return mSharedPreferences.getBoolean(key, false);
+    }
+
+
+    public void edit() {
+        mBulkUpdate = true;
+        mEditor = mSharedPreferences.edit();
+    }
+
+    public void commit() {
+        if (mEditor == null || !mBulkUpdate) {
+            throw new RuntimeException("Only call commit() after calling edit()");
+        }
+        mBulkUpdate = false;
+        mEditor.commit();
+        mEditor = null;
+
+        while (!bulkEditKeyQueue.isEmpty()) {
+            notifyPrefsObservers(bulkEditKeyQueue.poll());
+        }
+    }
+
+    private void doEdit(String prefsKey) {
+        if (!mBulkUpdate && mEditor == null) {
+            mEditor = mSharedPreferences.edit();
+        } else if (mBulkUpdate) {
+            bulkEditKeyQueue.add(prefsKey);
+        }
+    }
+
+    private void doCommit(String prefsKey) {
+        if (!mBulkUpdate && mEditor != null) {
+            mEditor.commit();
+            mEditor = null;
+            notifyPrefsObservers(prefsKey);
+        }
+    }
+
+    private void notifyPrefsObservers(String sharedPrefKey) {
         setChanged();
         notifyObservers(sharedPrefKey);
     }
+
 
 }

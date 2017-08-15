@@ -1,9 +1,13 @@
 package app.anish.com.tapp.linkedin_auth;
 
+import static app.anish.com.tapp.fragments.LinkedInDialogFragment.LoginState;
+import static app.anish.com.tapp.fragments.LinkedInDialogFragment.LINKEDIN_LOGIN_STATUS_PREF_KEY;
+
 import android.app.IntentService;
 import android.content.Context;
 import android.content.Intent;
 import android.support.annotation.Nullable;
+import android.util.Log;
 
 import com.linkedin.platform.APIHelper;
 import com.linkedin.platform.errors.LIApiError;
@@ -29,6 +33,7 @@ public class LinkedInAppCredRetrieverService extends IntentService {
 
     private static final String URL = "https://api.linkedin.com/v1/people/~:(id,first-name,last-name)";
     private static final TappSharedPreferences sharedPrefs = TappSharedPreferences.getInstance();
+    private static final String LOG_TAG = LinkedInAppCredRetrieverService.class.getName();
 
     public LinkedInAppCredRetrieverService() {
         super(LinkedInAppCredRetrieverService.class.getName());
@@ -51,7 +56,8 @@ public class LinkedInAppCredRetrieverService extends IntentService {
 
             @Override
             public void onApiError(LIApiError LIApiError) {
-                sharedPrefs.saveString(SecuredSharedPrefs.LINKEDIN_ID.getInfoPrefKey(), TappSharedPreferences.ERRROR_VALUE);
+                Log.d(LOG_TAG, "error in api request: " + LIApiError.getMessage());
+                sharedPrefs.saveString(LINKEDIN_LOGIN_STATUS_PREF_KEY, LoginState.ERROR.toString());
                 countDownLatch.countDown();
             }
         });
@@ -69,15 +75,16 @@ public class LinkedInAppCredRetrieverService extends IntentService {
         try {
             saveLinkedInInfo(jsonObject);
         } catch (JSONException e) {
-            sharedPrefs.saveString(SecuredSharedPrefs.LINKEDIN_ID.getInfoPrefKey(), TappSharedPreferences.ERRROR_VALUE);
+            Log.d(LOG_TAG, "Error parsing api response into JSON");
+            sharedPrefs.saveString(LINKEDIN_LOGIN_STATUS_PREF_KEY, LoginState.ERROR.toString());
         }
+        sharedPrefs.saveString(LINKEDIN_LOGIN_STATUS_PREF_KEY, LoginState.DONE.toString());
     }
 
     private void saveLinkedInInfo(JSONObject jsonObject) throws JSONException {
         String linkedInId = jsonObject.getString("id");
         String firstName = jsonObject.getString("firstName");
         String lastName = jsonObject.getString("lastName");
-
         sharedPrefs.saveString(SecuredSharedPrefs.LINKEDIN_ID.getInfoPrefKey(), linkedInId);
         sharedPrefs.saveString(SettingsInfo.LINKEDIN_NAME.getInfoPrefKey(), firstName + " " + lastName);
     }
