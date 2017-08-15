@@ -22,5 +22,15 @@ public enum SecuredSharedPrefs implements SharePrefKeyInfo{
         public String getShareInfoPrefKey() {
             return SettingsInfo.LINKEDIN_NAME.getShareInfoPrefKey();
         }
+    },
+    LINKEDIN_WEB_TOKEN {
+        public String getInfoPrefKey() { return "LINKEDIN_WEB_TOKEN"; }
+
+        public String getShareInfoPrefKey () {
+            return null;
+        }
+
     }
+
+
 }

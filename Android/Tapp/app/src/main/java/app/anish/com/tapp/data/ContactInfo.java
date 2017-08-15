@@ -33,15 +33,12 @@ public final class ContactInfo {
 
     public static String getOwnerName(Context context) {
         Cursor cursor = context.getContentResolver().query(ContactsContract.Profile.CONTENT_URI, SELF_PROJECTION, null, null, null);
-        cursor.moveToFirst();
-
-        String ownerName =  cursor.getString(OWNER_NAME_CURSOR_INDEX);
-
-        if (StringUtils.stringIsEmpty(ownerName)) {
-            return null;
+        if (cursor != null && cursor.moveToFirst()) {
+            String ownerName = cursor.getString(OWNER_NAME_CURSOR_INDEX);
+            cursor.close();
+            return StringUtils.stringIsEmpty(ownerName) ? null : ownerName;
         }
-
-        return ownerName;
+        return null;
     }
 
     public static String getOwnerEmail(Context context) {

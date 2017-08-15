@@ -1,10 +1,12 @@
 package app.anish.com.tapp.fragments;
 
+import android.app.Dialog;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
+import android.util.DisplayMetrics;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -13,13 +15,21 @@ import android.widget.ProgressBar;
 import android.widget.Toast;
 
 import com.linkedin.platform.LISessionManager;
+import com.linkedin.platform.errors.LIAuthError;
+import com.linkedin.platform.listeners.AuthListener;
+import com.linkedin.platform.utils.Scope;
+
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Observable;
+import java.util.Observer;
 
 import app.anish.com.tapp.R;
-import app.anish.com.tapp.linkedin_auth.LinkedInLoginFlow.FlowCompletionListener;
-import app.anish.com.tapp.linkedin_auth.LinkedInAppLoginFlow;
-import app.anish.com.tapp.linkedin_auth.LinkedInWebLoginFlow;
+import app.anish.com.tapp.dialogs.LinkedInWebViewLoginDialog;
+import app.anish.com.tapp.linkedin_auth.LinkedInAppCredRetrieverService;
 import app.anish.com.tapp.shared_prefs.SecuredSharedPrefs;
 import app.anish.com.tapp.shared_prefs.SettingsInfo;
+import app.anish.com.tapp.shared_prefs.TappSharedPreferences;
 import app.anish.com.tapp.shared_prefs.Token;
 import app.anish.com.tapp.utils.PackageUtils;
 import app.anish.com.tapp.utils.SharedPrefsUtils;
@@ -31,22 +41,39 @@ import app.anish.com.tapp.utils.SharedPrefsUtils;
  * https://www.studytutorial.in/linkedin-integration-and-login-in-android-tutorial
  */
 
-public class LinkedinDialogFragment extends Fragment implements View.OnClickListener {
+public class LinkedInDialogFragment extends Fragment implements View.OnClickListener, Observer {
 
-
-    private static final String LOG_TAG = LinkedinDialogFragment.class.getSimpleName();
     private static final String LINKEDIN_APP_PACKAGE_NAME = "com.linkedin.android";
-
-    private final FlowCompletionListener flowCompletionListener = new MyFlowCompletionListener();
+    private static final TappSharedPreferences sharedPrefs = TappSharedPreferences.getInstance();
 
     private Button loginButton;
     private ProgressBar progressBar;
     private Context context;
+    private LoginState loginState = LoginState.WAITING;
+
 
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         context = getActivity().getApplicationContext();
+    }
+
+    @Override
+    public void onStart() {
+        super.onStart();
+        sharedPrefs.addObserver(this);
+    }
+
+    @Override
+    public void onStop() {
+        super.onStop();
+        sharedPrefs.deleteObserver(this);
+    }
+
+    @Override
+    public void onResume() {
+        super.onResume();
+        checkLinkedInResults();
     }
 
     @Nullable
@@ -90,23 +117,38 @@ public class LinkedinDialogFragment extends Fragment implements View.OnClickList
 
     private void loginToLinkedIn() {
         toggleProgressBar(true);
+        loginState = LoginState.BEGUN;
 
-        if (PackageUtils.isPackageInstalled(getContext(), LINKEDIN_APP_PACKAGE_NAME)) {
-            getLinkedInInfoThroughApp();
-        } else {
-            getLinkedInInfoThroughWeb();
-        }
+//        if (PackageUtils.isPackageInstalled(getContext(), LINKEDIN_APP_PACKAGE_NAME)) {
+//            getLinkedInInfoThroughApp();
+//        } else {
+//            getLinkedInInfoThroughWeb();
+//        }
+        getLinkedInInfoThroughWeb();
     }
 
     private void getLinkedInInfoThroughApp() {
-        LinkedInAppLoginFlow appLoginFlow = new LinkedInAppLoginFlow(getContext(), this, flowCompletionListener);
-        appLoginFlow.startFlow();
+        LISessionManager sessionManager = LISessionManager.getInstance(context);
+        sessionManager.init(this, Scope.build(Scope.R_BASICPROFILE), new AuthListener() {
+            @Override
+            public void onAuthSuccess() {
+                Intent intent = new Intent(context, LinkedInAppCredRetrieverService.class);
+                context.startService(intent);
+            }
+
+            @Override
+            public void onAuthError(LIAuthError error) {
+                Toast.makeText(context, "Error authenticating user to LinkedIn", Toast.LENGTH_LONG).show();
+            }
+        }, false);
     }
 
 
     private void getLinkedInInfoThroughWeb() {
-        LinkedInWebLoginFlow appLoginFlow = new LinkedInWebLoginFlow(getContext(), flowCompletionListener);
-        appLoginFlow.startFlow();
+        Dialog dialog = new LinkedInWebViewLoginDialog(getContext());
+        DisplayMetrics metrics = context.getResources().getDisplayMetrics();
+        dialog.getWindow().setLayout((6 * metrics.widthPixels) / 7, (4 * metrics.heightPixels) / 5);
+        dialog.show();
     }
 
     private void toggleProgressBar(boolean show) {
@@ -135,6 +177,41 @@ public class LinkedinDialogFragment extends Fragment implements View.OnClickList
         toggleLoginButton(false);
     }
 
+    private void checkLinkedInResults() {
+        if (loginState != LoginState.BEGUN) {
+            return;
+        }
+
+        Map<String, String> prefsResultsMap = new HashMap<>();
+        prefsResultsMap.put(SecuredSharedPrefs.LINKEDIN_WEB_TOKEN.getInfoPrefKey(),sharedPrefs.getString(SecuredSharedPrefs.LINKEDIN_WEB_TOKEN.getInfoPrefKey()));
+        prefsResultsMap.put(SecuredSharedPrefs.LINKEDIN_ID.getInfoPrefKey(), sharedPrefs.getString(SecuredSharedPrefs.LINKEDIN_ID.getInfoPrefKey()));
+        boolean errorFound = false;
+
+        for (Map.Entry<String, String> entry : prefsResultsMap.entrySet()) {
+            if(TappSharedPreferences.ERRROR_VALUE.equals(entry.getValue()) && entry.getValue() != null) {
+                displayResultErrorMsg(entry.getKey());
+                sharedPrefs.deleteKey(entry.getKey());
+                errorFound = true;
+            }
+        }
+
+        updateLoginUi(!errorFound);
+    }
+
+    private void displayResultErrorMsg(String prefsKey) {
+        if (prefsKey.equals(SecuredSharedPrefs.LINKEDIN_WEB_TOKEN.getInfoPrefKey())) {
+            Toast.makeText(context, "Error authorizing user", Toast.LENGTH_LONG).show();
+        } else if (prefsKey.equals(SecuredSharedPrefs.LINKEDIN_ID.getInfoPrefKey())) {
+            Toast.makeText(context, "Error retriving user information from LinkedIn", Toast.LENGTH_LONG).show();
+        }
+    }
+
+    private void updateLoginUi(boolean loggedIn) {
+        toggleProgressBar(false);
+        loginState = LoginState.DONE;
+        toggleLoginButton(loggedIn);
+    }
+
     @Override
     public void onClick(View view) {
         switch (view.getId()) {
@@ -144,19 +221,23 @@ public class LinkedinDialogFragment extends Fragment implements View.OnClickList
         }
     }
 
-    private class MyFlowCompletionListener implements FlowCompletionListener {
-
-        @Override
-        public void onSuccess() {
-            Toast.makeText(context, "Successfully logged into LinkedIn", Toast.LENGTH_SHORT).show();
-            toggleLoginButton(true);
-            toggleProgressBar(false);
+    @Override
+    public void update(Observable observable, Object arg) {
+        if (observable instanceof TappSharedPreferences) {
+            String key = (String) arg;
+            String value = sharedPrefs.getString(key);
+            if (TappSharedPreferences.ERRROR_VALUE.equals(value)) {
+                displayResultErrorMsg(key);
+                updateLoginUi(false);
+            } else {
+                updateLoginUi(true);
+            }
         }
+    }
 
-        @Override
-        public void onFailure(Throwable throwable) {
-            Toast.makeText(context, "Failed to login into LinkedIn", Toast.LENGTH_SHORT).show();
-            toggleProgressBar(false);
-        }
+    private enum LoginState {
+        WAITING,
+        BEGUN,
+        DONE
     }
 }
