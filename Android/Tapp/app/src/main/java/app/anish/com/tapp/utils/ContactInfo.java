@@ -1,4 +1,4 @@
-package app.anish.com.tapp.data;
+package app.anish.com.tapp.utils;
 
 import android.accounts.Account;
 import android.accounts.AccountManager;

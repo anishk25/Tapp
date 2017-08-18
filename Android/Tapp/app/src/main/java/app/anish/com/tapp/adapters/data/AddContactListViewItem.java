@@ -1,6 +1,9 @@
 package app.anish.com.tapp.adapters.data;
 
+import android.content.Context;
+import android.view.LayoutInflater;
 import android.view.View;
+import android.view.ViewGroup;
 
 /**
  * An interface representing the data in the list view
@@ -10,7 +13,17 @@ import android.view.View;
  */
 
 public interface AddContactListViewItem {
+     /**
+      * Get the view for the add contact list
+      * @param layoutInflater
+      * @param rootViewGroup
+      * @return contact View
+      */
+     View getView(LayoutInflater layoutInflater, ViewGroup rootViewGroup);
 
-     View getView();
-     void doAddContactAction();
+     /**
+      * Performs the add action when user clicks on this particular
+      * item
+      */
+     void performAddAction(Context context);
 }

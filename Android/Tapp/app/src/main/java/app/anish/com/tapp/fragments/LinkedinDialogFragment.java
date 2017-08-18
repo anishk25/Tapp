@@ -2,6 +2,7 @@ package app.anish.com.tapp.fragments;
 
 import android.app.Dialog;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
@@ -25,10 +26,13 @@ import java.util.Observer;
 import app.anish.com.tapp.R;
 import app.anish.com.tapp.dialogs.LinkedInWebViewLoginDialog;
 import app.anish.com.tapp.linkedin_auth.LinkedInAppCredRetrieverService;
+import app.anish.com.tapp.linkedin_auth.LinkedInWebCredRetrieverService;
 import app.anish.com.tapp.shared_prefs.SecuredSharedPrefs;
 import app.anish.com.tapp.shared_prefs.SettingsInfo;
 import app.anish.com.tapp.shared_prefs.TappSharedPreferences;
 import app.anish.com.tapp.shared_prefs.Token;
+import app.anish.com.tapp.utils.PackageUtils;
+import app.anish.com.tapp.utils.ServiceUtils;
 
 
 /**
@@ -38,8 +42,6 @@ import app.anish.com.tapp.shared_prefs.Token;
  */
 
 public class LinkedInDialogFragment extends Fragment implements View.OnClickListener, Observer {
-
-    private static final String LINKEDIN_APP_PACKAGE_NAME = "com.linkedin.android";
 
     private static final TappSharedPreferences sharedPrefs = TappSharedPreferences.getInstance();
     public static final String LINKEDIN_LOGIN_STATUS_PREF_KEY = "linkedInLoginState";
@@ -114,7 +116,7 @@ public class LinkedInDialogFragment extends Fragment implements View.OnClickList
 
     private void loginToLinkedIn() {
         toggleProgressBar(true);
-//        if (PackageUtils.isPackageInstalled(getContext(), LINKEDIN_APP_PACKAGE_NAME)) {
+//        if (PackageUtils.isPackageInstalled(getContext(), PackageUtils.LINKEDIN_PACKAGE_NAME)) {
 //            getLinkedInInfoThroughApp();
 //        } else {
 //            getLinkedInInfoThroughWeb();
@@ -143,6 +145,16 @@ public class LinkedInDialogFragment extends Fragment implements View.OnClickList
         Dialog dialog = new LinkedInWebViewLoginDialog(getContext());
         DisplayMetrics metrics = context.getResources().getDisplayMetrics();
         dialog.getWindow().setLayout((6 * metrics.widthPixels) / 7, (4 * metrics.heightPixels) / 5);
+
+        dialog.setOnDismissListener(new DialogInterface.OnDismissListener() {
+            @Override
+            public void onDismiss(DialogInterface dialogInterface) {
+                if (!ServiceUtils.isServiceRunning(LinkedInWebCredRetrieverService.class, context)) {
+                    toggleProgressBar(false);
+                }
+            }
+        });
+
         dialog.show();
     }
 

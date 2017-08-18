@@ -18,7 +18,7 @@ import java.util.ArrayList;
 
 import app.anish.com.tapp.R;
 import app.anish.com.tapp.shared_prefs.SettingsInfo;
-import app.anish.com.tapp.utils.SharedPrefsUtils;
+import app.anish.com.tapp.shared_prefs.TappSharedPreferences;
 
 /**
  * Created by akhattar on 5/5/17.
@@ -27,6 +27,7 @@ import app.anish.com.tapp.utils.SharedPrefsUtils;
 public class SettingsListViewAdapter extends ArrayAdapter<SettingsInfo> {
 
     private Context mContext;
+    private static TappSharedPreferences sharedPreferences = TappSharedPreferences.getInstance();
 
     public SettingsListViewAdapter(@NonNull ArrayList<SettingsInfo> data, Context context) {
         super(context, R.layout.cv_settings_base_content, data);
@@ -57,7 +58,6 @@ public class SettingsListViewAdapter extends ArrayAdapter<SettingsInfo> {
         return convertView;
     }
 
-
     private ViewHolder createViewHolder(View rootView) {
         ViewHolder viewHolder = new ViewHolder();
         viewHolder.tvTitle = (TextView) rootView.findViewById(R.id.tvSettingsItemTitle);
@@ -70,8 +70,7 @@ public class SettingsListViewAdapter extends ArrayAdapter<SettingsInfo> {
     private void setDataForViewsInViewHolder(ViewHolder viewHolder, SettingsInfo settingsInfo) {
         String title = settingsInfo.getTitle();
         String details = getDetailDispString(settingsInfo);
-        boolean share = SharedPrefsUtils.getBoolean(mContext,
-                SharedPrefsUtils.SETTINGS_SHARED_PREFS_KEY, settingsInfo.getShareInfoPrefKey());
+        boolean share = sharedPreferences.getBoolean(settingsInfo.getShareInfoPrefKey());
 
         viewHolder.tvTitle.setText(title);
         viewHolder.tvDetails.setText(details);
@@ -113,23 +112,19 @@ public class SettingsListViewAdapter extends ArrayAdapter<SettingsInfo> {
             @Override
             public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
                 // check if data is present in shared pref
-                if(isChecked && SharedPrefsUtils.getString(mContext, SharedPrefsUtils.SETTINGS_SHARED_PREFS_KEY, settingsInfo.getInfoPrefKey()) == null) {
+                if(isChecked && sharedPreferences.getString(settingsInfo.getInfoPrefKey()) == null) {
                     checkBox.setChecked(false);
                     Toast.makeText(mContext, "Property must be set before enabling share", Toast.LENGTH_LONG).show();
                 } else {
-                    SharedPrefsUtils.saveBoolean(mContext, SharedPrefsUtils.SETTINGS_SHARED_PREFS_KEY,
-                            settingsInfo.getShareInfoPrefKey(), isChecked);
+                    sharedPreferences.saveBoolean(settingsInfo.getShareInfoPrefKey(), isChecked);
                 }
             }
         });
     }
 
-
-
     private String getDetailDispString(SettingsInfo settingsInfo) {
         String prefix = settingsInfo.getInfoPrefix();
-        String details = SharedPrefsUtils.getString(mContext, SharedPrefsUtils.SETTINGS_SHARED_PREFS_KEY,
-                settingsInfo.getInfoPrefKey());
+        String details = sharedPreferences.getString(settingsInfo.getInfoPrefKey());
         return details == null ? "Not Set" : prefix + details;
     }
 

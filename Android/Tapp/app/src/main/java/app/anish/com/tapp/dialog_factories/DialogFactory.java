@@ -1,5 +1,6 @@
 package app.anish.com.tapp.dialog_factories;
 
+import android.app.Activity;
 import android.app.Dialog;
 import android.content.Context;
 

@@ -14,7 +14,7 @@ import java.util.Queue;
 
 public final class TappSharedPreferences extends Observable {
 
-    private static TappSharedPreferences tappSharedPreferences;
+    private static TappSharedPreferences instance;
     private  SharedPreferences mSharedPreferences;
     private  SharedPreferences.Editor mEditor;
     private boolean mBulkUpdate = false;
@@ -25,11 +25,17 @@ public final class TappSharedPreferences extends Observable {
         mSharedPreferences = context.getSharedPreferences(context.getPackageName(), Context.MODE_PRIVATE);
     }
 
-    public static TappSharedPreferences getInstance(Context context) {
-        if (tappSharedPreferences == null) {
-            tappSharedPreferences = new TappSharedPreferences(context);
+    public static void init(Context context) {
+        if (instance == null) {
+            instance = new TappSharedPreferences(context);
         }
-        return tappSharedPreferences;
+    }
+
+    public static TappSharedPreferences getInstance() {
+        if (instance == null) {
+            throw new RuntimeException("Init must be called before getInstance()");
+        }
+        return instance;
     }
 
     public void saveString(String key, String value) {
@@ -49,7 +55,7 @@ public final class TappSharedPreferences extends Observable {
         if (getBoolean(key) != value) {
             doEdit(key);
             mEditor.putBoolean(key, value);
-            notifyPrefsObservers(key);
+            doCommit(key);
         }
     }
 

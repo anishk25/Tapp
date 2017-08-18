@@ -5,7 +5,7 @@ import android.view.View;
 import android.widget.EditText;
 
 import app.anish.com.tapp.R;
-import app.anish.com.tapp.utils.SharedPrefsUtils;
+import app.anish.com.tapp.shared_prefs.TappSharedPreferences;
 import app.anish.com.tapp.utils.StringUtils;
 
 /**
@@ -17,7 +17,7 @@ public abstract class SingleEditTextSettingsDialogFactory extends BinarySettings
     @Override
     protected void initUI(View rootView, Context context) {
         EditText editText = (EditText) rootView.findViewById(R.id.etSettingsDialogValue);
-        String savedData = SharedPrefsUtils.getString(context, SharedPrefsUtils.SETTINGS_SHARED_PREFS_KEY, getKey().toString());
+        String savedData = TappSharedPreferences.getInstance().getString(getKey());
         if (!StringUtils.stringIsEmpty(savedData)) {
             editText.setText(savedData);
         }
@@ -27,9 +27,9 @@ public abstract class SingleEditTextSettingsDialogFactory extends BinarySettings
     protected void saveData(View rootView, Context context) {
         String data  = ((EditText) rootView.findViewById(R.id.etSettingsDialogValue)).getText().toString();
         if (StringUtils.stringIsEmpty(data)) {
-            SharedPrefsUtils.deleteKey(context, SharedPrefsUtils.SETTINGS_SHARED_PREFS_KEY, getKey());
+            TappSharedPreferences.getInstance().deleteKey(getKey());
         } else {
-            SharedPrefsUtils.saveString(context, SharedPrefsUtils.SETTINGS_SHARED_PREFS_KEY, getKey(), data);
+            TappSharedPreferences.getInstance().saveString(getKey(), data);
         }
     }
 

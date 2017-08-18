@@ -14,6 +14,6 @@ public class TappApplication extends Application {
     public void onCreate() {
         super.onCreate();
         // initialize shared preferences at start of activity
-        TappSharedPreferences.getInstance(getApplicationContext());
+        TappSharedPreferences.init(getApplicationContext());
     }
 }

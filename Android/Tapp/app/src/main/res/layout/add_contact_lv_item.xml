@@ -16,8 +16,10 @@
             android:layout_width="48dp"
             android:layout_height="48dp"
             android:layout_gravity="center_vertical"
+            android:src="@drawable/ic_phone_icon"
             android:id="@+id/ivAddContactIcon"
             />
+
 
         <TextView
             android:layout_width="wrap_content"
@@ -29,6 +31,7 @@
             android:layout_gravity="center_vertical"
             android:layout_marginLeft="8dp"
             android:layout_marginStart="8dp"
+            android:id="@+id/tvAddContact"
             />
 
     </LinearLayout>

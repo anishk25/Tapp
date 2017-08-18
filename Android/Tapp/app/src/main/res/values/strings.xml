@@ -29,7 +29,11 @@
     <string name = "linkedin_logout_text">Logout from LinkedIn</string>
 
     <string name = "json_share_signature">Tapp536114IsAwesome</string>
-    <string name="loading">Loading &#8230;</string>
-    <string name="default_add_contact_text">Add to contacts</string>
+    <string name = "loading">Loading &#8230;</string>
+    <string name = "default_add_contact_text">Add to contacts</string>
+
+    <string name = "facebook_add_text">Send Friend Request through Facebook</string>
+    <string name = "linked_in_add_text">Connect on LinkedIn</string>
+    <string name = "phone_add_text">Add to phone contacts</string>
 
 </resources>

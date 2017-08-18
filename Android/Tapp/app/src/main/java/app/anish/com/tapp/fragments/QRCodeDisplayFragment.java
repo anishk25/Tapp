@@ -3,10 +3,8 @@ package app.anish.com.tapp.fragments;
 import android.Manifest;
 import android.app.Activity;
 import android.app.AlertDialog;
-import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
-import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
 import android.os.Build;
@@ -38,11 +36,11 @@ import java.util.Map;
 
 import app.anish.com.tapp.R;
 import app.anish.com.tapp.activities.SettingsActivity;
-import app.anish.com.tapp.data.ContactInfo;
+import app.anish.com.tapp.utils.ContactInfo;
 import app.anish.com.tapp.shared_prefs.SecuredSharedPrefs;
 import app.anish.com.tapp.shared_prefs.SettingsInfo;
 import app.anish.com.tapp.shared_prefs.SharePrefKeyInfo;
-import app.anish.com.tapp.utils.SharedPrefsUtils;
+import app.anish.com.tapp.shared_prefs.TappSharedPreferences;
 
 /**
  * Created by akhattar on 4/11/17.
@@ -55,6 +53,8 @@ public class QRCodeDisplayFragment extends Fragment implements View.OnClickListe
     private static final String QR_CODE_CHAR_SET = "ISO-8859-1";
     private static final int PERMISSIONS_REQUEST_READ_CONTACTS = 1;
     private static final int SETTINGS_ACTIVITY_RESULT_CODE = 2;
+
+    private static final TappSharedPreferences sharedPrefs = TappSharedPreferences.getInstance();
 
     // UI Elements
     private Activity mActivity;
@@ -121,9 +121,9 @@ public class QRCodeDisplayFragment extends Fragment implements View.OnClickListe
     }
 
     private void populateContactInfo() {
-        boolean opened = SharedPrefsUtils.getBoolean(mActivity, SharedPrefsUtils.SETTINGS_SHARED_PREFS_KEY, APP_OPENED_FIRST_TIME_KEY);
+        boolean opened = sharedPrefs.getBoolean(APP_OPENED_FIRST_TIME_KEY);
         if (!opened) {
-            SharedPrefsUtils.saveBoolean(mActivity, SharedPrefsUtils.SETTINGS_SHARED_PREFS_KEY, APP_OPENED_FIRST_TIME_KEY, true);
+            sharedPrefs.saveBoolean(APP_OPENED_FIRST_TIME_KEY, true);
             showPermissionDialog();
         }
     }
@@ -133,15 +133,14 @@ public class QRCodeDisplayFragment extends Fragment implements View.OnClickListe
         String phoneNumber = ContactInfo.getCurrentPhoneNumber(mActivity);
         String email = ContactInfo.getOwnerEmail(mActivity);
 
-        SharedPreferences sharedPref = mActivity.getSharedPreferences(SharedPrefsUtils.SETTINGS_SHARED_PREFS_KEY, Context.MODE_PRIVATE);
-        SharedPreferences.Editor editor = sharedPref.edit();
-        editor.putString(SettingsInfo.OWNER_NAME.getInfoPrefKey(), ownerName);
-        editor.putString(SettingsInfo.PHONE_NUMBER.getInfoPrefKey(), phoneNumber);
-        editor.putString(SettingsInfo.EMAIL.getInfoPrefKey(), email);
-        editor.putBoolean(SettingsInfo.OWNER_NAME.getShareInfoPrefKey(), true);
-        editor.putBoolean(SettingsInfo.PHONE_NUMBER.getShareInfoPrefKey(), true);
-        editor.putBoolean(SettingsInfo.EMAIL.getShareInfoPrefKey(), true);
-        editor.commit();
+        sharedPrefs.edit();
+        sharedPrefs.saveString(SettingsInfo.OWNER_NAME.getInfoPrefKey(), ownerName);
+        sharedPrefs.saveString(SettingsInfo.PHONE_NUMBER.getInfoPrefKey(), phoneNumber);
+        sharedPrefs.saveString(SettingsInfo.EMAIL.getInfoPrefKey(), email);
+        sharedPrefs.saveBoolean(SettingsInfo.OWNER_NAME.getShareInfoPrefKey(), true);
+        sharedPrefs.saveBoolean(SettingsInfo.PHONE_NUMBER.getShareInfoPrefKey(), true);
+        sharedPrefs.saveBoolean(SettingsInfo.EMAIL.getShareInfoPrefKey(), true);
+        sharedPrefs.commit();
     }
 
     private void showPermissionDialog() {
@@ -240,9 +239,9 @@ public class QRCodeDisplayFragment extends Fragment implements View.OnClickListe
     private JSONObject getSavedData(SharePrefKeyInfo[] keyInfoArr) throws JSONException {
         JSONObject jsonObject = new JSONObject();
         for (SharePrefKeyInfo info : keyInfoArr) {
-            boolean shareable = SharedPrefsUtils.getBoolean(mActivity, SharedPrefsUtils.SETTINGS_SHARED_PREFS_KEY, info.getShareInfoPrefKey());
+            boolean shareable = sharedPrefs.getBoolean(info.getShareInfoPrefKey());
             if (shareable) {
-                String data = SharedPrefsUtils.getString(mActivity, SharedPrefsUtils.SETTINGS_SHARED_PREFS_KEY, info.getInfoPrefKey());
+                String data = sharedPrefs.getString(info.getInfoPrefKey());
                 if (data != null) {
                     jsonObject.put(info.toString(), data);
                 }

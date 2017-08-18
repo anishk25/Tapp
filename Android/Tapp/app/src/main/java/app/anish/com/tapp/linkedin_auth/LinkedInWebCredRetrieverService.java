@@ -90,6 +90,7 @@ public class LinkedInWebCredRetrieverService extends IntentService {
     }
 
     private void getUserInfo(AccessToken accessToken) {
+        Log.d("LINKEDIN", "Access token is " + accessToken.getValue());
         Call<LinkedInBasicProfileData> call = infoEndpoint.getBasicProfileData("Bearer " + accessToken.getValue());
         try {
             Response<LinkedInBasicProfileData> response = call.execute();
@@ -99,6 +100,7 @@ public class LinkedInWebCredRetrieverService extends IntentService {
                     sharedPrefs.saveString(SecuredSharedPrefs.LINKEDIN_WEB_TOKEN.getInfoPrefKey(), accessToken.toString());
                     sharedPrefs.saveString(SecuredSharedPrefs.LINKEDIN_ID.getInfoPrefKey(), data.getId());
                     sharedPrefs.saveString(SettingsInfo.LINKEDIN_NAME.getInfoPrefKey(), data.getFirstName() + " " + data.getLastName());
+                    Log.d("LINKEDIN! LOGIN!", "The linkedin id is " + data.getId());
                 } else {
                     throw new Exception("Profile data received from response is null");
                 }

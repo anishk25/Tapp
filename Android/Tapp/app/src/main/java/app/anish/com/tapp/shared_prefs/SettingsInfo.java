@@ -1,11 +1,11 @@
 package app.anish.com.tapp.shared_prefs;
 
-import app.anish.com.tapp.data.DialogFactory;
-import app.anish.com.tapp.data.EmailSettingsDialogFactory;
-import app.anish.com.tapp.data.FacebookSettingsDialogFactory;
-import app.anish.com.tapp.data.LinkedinSettingsDialogFactory;
-import app.anish.com.tapp.data.OwnerNameSettingsDialogFactory;
-import app.anish.com.tapp.data.PhoneNumberSettingsDialogFactory;
+import app.anish.com.tapp.dialog_factories.DialogFactory;
+import app.anish.com.tapp.dialog_factories.EmailSettingsDialogFactory;
+import app.anish.com.tapp.dialog_factories.FacebookSettingsDialogFactory;
+import app.anish.com.tapp.dialog_factories.LinkedinSettingsDialogFactory;
+import app.anish.com.tapp.dialog_factories.OwnerNameSettingsDialogFactory;
+import app.anish.com.tapp.dialog_factories.PhoneNumberSettingsDialogFactory;
 
 /**
  * Created by akhattar on 5/5/17.

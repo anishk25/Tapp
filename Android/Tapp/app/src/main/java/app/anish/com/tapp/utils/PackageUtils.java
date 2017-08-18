@@ -15,6 +15,9 @@ import java.security.NoSuchAlgorithmException;
 
 public final class PackageUtils {
 
+    public static final String FACEBOOK_PACKAGE_NAME = "com.facebook.katana";
+    public static final String LINKEDIN_PACKAGE_NAME = "com.linkedin.android";
+
     public static String getPackageHashKey(Context context) {
         try {
             PackageInfo info = context.getPackageManager().getPackageInfo(
