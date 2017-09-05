@@ -33,7 +33,7 @@ public class LinkedInWebViewLoginDialog extends Dialog {
     // Used to prevent CSRF attacks
     private static final String STATE = "1i4F65[*39ml77x";
 
-    // Url that Linkedin Auth Process will redirect to
+    // Url that LinkedIn Auth Process will redirect to
     public static final String REDIRECT_URI = "http://app.tapp.anish.linkedin.redirecturl";
 
     // Constants to build URLS
@@ -44,7 +44,6 @@ public class LinkedInWebViewLoginDialog extends Dialog {
     private static final String CLIENT_ID_PARAM = "client_id";
     private static final String STATE_PARAM = "state";
     private static final String REDIRECT_URI_PARAM = "redirect_uri";
-
 
     private ProgressDialog mProgressDialog;
     private WebView mWebView;
@@ -62,6 +61,8 @@ public class LinkedInWebViewLoginDialog extends Dialog {
         initWebView();
         loadAuthUrl();
     }
+
+
 
     private void initWebView() {
         mWebView = (WebView) findViewById(R.id.wvWebView);
@@ -139,5 +140,13 @@ public class LinkedInWebViewLoginDialog extends Dialog {
             getContext().startService(intent);
             dismiss();
         }
+    }
+
+    @Override
+    public void dismiss() {
+        if (mWebView != null) {
+            mWebView.destroy();
+        }
+        super.dismiss();
     }
 }

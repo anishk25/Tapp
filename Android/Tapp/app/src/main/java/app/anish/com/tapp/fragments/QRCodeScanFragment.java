@@ -16,10 +16,14 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.FrameLayout;
+import android.widget.Toast;
 
 import app.anish.com.tapp.camera.CameraPreview;
 import app.anish.com.tapp.R;
 import app.anish.com.tapp.camera.CameraScanProcessor;
+import app.anish.com.tapp.camera.HardwareCameraScanProcessor;
+import app.anish.com.tapp.exceptions.CameraException;
+import retrofit2.http.POST;
 
 /**
  * Created by akhattar on 4/11/17.
@@ -39,7 +43,6 @@ public class QRCodeScanFragment extends Fragment {
     };
 
     private Camera mCamera;
-    private CameraPreview mCameraPreview;
     private Button reqCamPermButton;
 
     private CameraScanProcessor cameraScanProcessor;
@@ -73,7 +76,7 @@ public class QRCodeScanFragment extends Fragment {
     }
 
     private void reqCameraPermission() {
-        if (reqCamPermButton.getVisibility() == View.GONE) {
+        if (reqCamPermButton != null && reqCamPermButton.getVisibility() == View.GONE) {
             if (ContextCompat.checkSelfPermission(getContext(), Manifest.permission.CAMERA) != PackageManager.PERMISSION_GRANTED) {
                 requestPermissions(new String[]{Manifest.permission.CAMERA}, PERMISSIONS_REQUEST_FOR_CAMERA);
             } else {
@@ -95,20 +98,27 @@ public class QRCodeScanFragment extends Fragment {
 
     private void startCameraPreview() {
         if (mCamera == null) {
-            initializeCamera();
-            mCamera.startPreview();
+            try {
+                initializeCamera();
+                mCamera.startPreview();
+            } catch (CameraException e) {
+                Toast.makeText(getContext(), "Error opening camera, try restarting your phone", Toast.LENGTH_LONG).show();
+            }
         } else {
             mCamera.startPreview();
         }
     }
 
-    private void initializeCamera() {
+
+    private void initializeCamera() throws CameraException {
         mCamera = getCameraInstance();
         if (mCamera != null) {
-            cameraScanProcessor = new CameraScanProcessor(mCamera, getContext());
-            mCameraPreview = new CameraPreview(getContext(), mCamera, previewCallback);
+            cameraScanProcessor = new HardwareCameraScanProcessor(mCamera, getContext());
+            CameraPreview cameraPreview = new CameraPreview(getContext(), mCamera, previewCallback);
             FrameLayout frameLayout = (FrameLayout) rootView.findViewById(R.id.flCamera);
-            frameLayout.addView(mCameraPreview);
+            frameLayout.addView(cameraPreview);
+        } else {
+            throw new CameraException("Error initializing camera");
         }
     }
 
@@ -123,7 +133,6 @@ public class QRCodeScanFragment extends Fragment {
                 }
             }
         });
-
     }
 
     private static Camera getCameraInstance() {

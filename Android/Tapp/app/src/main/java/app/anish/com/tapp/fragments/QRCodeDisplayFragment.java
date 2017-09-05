@@ -48,7 +48,7 @@ import app.anish.com.tapp.shared_prefs.TappSharedPreferences;
 
 public class QRCodeDisplayFragment extends Fragment implements View.OnClickListener {
 
-    private static final String TAG = QRCodeDisplayFragment.class.getName();
+    private static final String LOG_TAG = QRCodeDisplayFragment.class.getName();
     private static final String APP_OPENED_FIRST_TIME_KEY = "APP_OPENED_FIRST_TIME";
     private static final String QR_CODE_CHAR_SET = "ISO-8859-1";
     private static final int PERMISSIONS_REQUEST_READ_CONTACTS = 1;
@@ -93,6 +93,7 @@ public class QRCodeDisplayFragment extends Fragment implements View.OnClickListe
         if (requestCode == PERMISSIONS_REQUEST_READ_CONTACTS) {
             if (allPermissionsGranted(grantResults)) {
                 populateSharedPrefs();
+                drawQRCode();
             } else {
                 showPermNotGrantedToast();
             }
@@ -102,14 +103,14 @@ public class QRCodeDisplayFragment extends Fragment implements View.OnClickListe
     @Override
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
         if (requestCode == SETTINGS_ACTIVITY_RESULT_CODE) {
-            redrawQRCode();
+            drawQRCode();
         }
     }
 
     private void initUI(View rootView) {
         qrProgressBar = (ProgressBar) rootView.findViewById(R.id.pbQrCode);
         qrImage = (ImageView) rootView.findViewById(R.id.ivQrCode);
-        initQRImage();
+        drawQRCode();
         Button settingsButton = (Button) rootView.findViewById(R.id.bQRCodeSettings);
         settingsButton.setOnClickListener(this);
     }
@@ -180,25 +181,17 @@ public class QRCodeDisplayFragment extends Fragment implements View.OnClickListe
         return true;
     }
 
-    private void initQRImage() {
-        try {
-            currQRData = getSavedContactInfo();
-            drawQRCode(currQRData);
-        } catch (Exception e) {
-            Toast.makeText(mActivity, "Error Intializing QR Code with contact data", Toast.LENGTH_LONG);
-        }
-    }
 
-    private void redrawQRCode() {
+    private void drawQRCode() {
         // do diff of current data on QR code and new data
         try {
             String updatedData = getSavedContactInfo();
-            if (!currQRData.equals(updatedData)) {
+            if (!updatedData.equals(currQRData)) {
                 drawQRCode(updatedData);
                 currQRData = updatedData;
             }
         } catch (Exception e) {
-            Toast.makeText(mActivity, "Error redrawing QR code", Toast.LENGTH_LONG);
+            Toast.makeText(mActivity, "Error drawing QR code", Toast.LENGTH_LONG).show();
         }
 
     }
@@ -211,7 +204,6 @@ public class QRCodeDisplayFragment extends Fragment implements View.OnClickListe
         Thread thread = new Thread(new Runnable() {
             public void run() {
                 try {
-
                     final Bitmap bitmap = createQRCode(data, 400, 400);
                     qrImage.post(new Runnable() {
                         public void run() {
@@ -221,7 +213,7 @@ public class QRCodeDisplayFragment extends Fragment implements View.OnClickListe
                         }
                     });
                 } catch (Exception e) {
-                    Log.d(TAG, "Error generating bitmap image");
+                    Log.d(LOG_TAG, "Error generating bitmap image");
                 }
             }
         });
@@ -232,6 +224,7 @@ public class QRCodeDisplayFragment extends Fragment implements View.OnClickListe
         JSONObject obj1 = getSavedData(SettingsInfo.values());
         JSONObject obj2 = getSavedData(SecuredSharedPrefs.values());
         JSONObject result = mergeJSONObjects(obj1, obj2);
+        Log.d(LOG_TAG, "Got QR ! \n" + result.toString());
         return result.toString();
     }
 
@@ -243,7 +236,7 @@ public class QRCodeDisplayFragment extends Fragment implements View.OnClickListe
             if (shareable) {
                 String data = sharedPrefs.getString(info.getInfoPrefKey());
                 if (data != null) {
-                    jsonObject.put(info.toString(), data);
+                    jsonObject.put(info.getInfoPrefKey(), data);
                 }
             }
         }
@@ -254,7 +247,9 @@ public class QRCodeDisplayFragment extends Fragment implements View.OnClickListe
         JSONObject result = new JSONObject(object1.toString());
         Iterator<String> it = object2.keys();
         while (it.hasNext()) {
-            result.put(it.next(), object2.get(it.next()));
+            String key = it.next();
+            String value = object2.getString(key);
+            result.put(key, value);
         }
         return result;
     }

@@ -3,12 +3,24 @@ package app.anish.com.tapp.camera;
 import android.app.AlertDialog;
 import android.content.Context;
 import android.content.DialogInterface;
-import android.hardware.Camera;
+import android.util.Pair;
+import android.view.LayoutInflater;
+import android.view.View;
+import android.widget.ListView;
+import android.widget.Toast;
 
-import net.sourceforge.zbar.Image;
-import net.sourceforge.zbar.ImageScanner;
-import net.sourceforge.zbar.Symbol;
-import net.sourceforge.zbar.SymbolSet;
+import org.json.JSONException;
+import org.json.JSONObject;
+
+import java.util.ArrayList;
+
+import app.anish.com.tapp.R;
+import app.anish.com.tapp.adapters.add_contact.AddContactListViewAdapter;
+import app.anish.com.tapp.adapters.add_contact.builder.AddContactListViewFactory;
+import app.anish.com.tapp.adapters.add_contact.builder.FacebookContactListViewItemFactory;
+import app.anish.com.tapp.adapters.add_contact.builder.LinkedInContactListViewItemFactory;
+import app.anish.com.tapp.adapters.add_contact.builder.PhoneContactListViewItemFactory;
+import app.anish.com.tapp.adapters.add_contact.lv_item.AddContactListViewItem;
 
 /**
  * Class for processing Camera Data
@@ -16,67 +28,65 @@ import net.sourceforge.zbar.SymbolSet;
  */
 
 @SuppressWarnings("deprecation")
-public class CameraScanProcessor {
-    
-    private static final int SCAN_FAIL_CODE = 0;
+public abstract class CameraScanProcessor {
 
-    private Camera mCamera;
-    private Context mContext;
-    private ImageScanner imageScanner;
-    private ScanState scanState;
+    private static final AddContactListViewFactory [] factories =
+            {
+               new PhoneContactListViewItemFactory(),
+               new FacebookContactListViewItemFactory(),
+               new LinkedInContactListViewItemFactory()
+            };
+
+    protected final Context mContext;
 
 
-    public CameraScanProcessor(Camera camera, Context context) {
-        this.mCamera = camera;
+    protected CameraScanProcessor(Context context) {
         this.mContext = context;
-        imageScanner = new ImageScanner();
-        scanState = ScanState.SCANNING;
     }
 
-    public void processCameraDataAndOpenContactsDialog(byte[] bytes) {
-        if (scanState == ScanState.SCANNING) {
-            Camera.Parameters parameters = mCamera.getParameters();
-            Camera.Size size = parameters.getPreviewSize();
+    public abstract void processCameraDataAndOpenContactsDialog(byte [] data);
 
-            Image cameraImage = new Image(size.width, size.height, "Y800");
-            cameraImage.setData(bytes);
+    protected void showAddContactDialog(String qrCodeData) {
+        try {
+            JSONObject jsonObject = new JSONObject(qrCodeData);
+            showAddContactDialog(jsonObject);
+        } catch (JSONException e) {
+            Toast.makeText(mContext, "Error : Malformed QR code data", Toast.LENGTH_LONG).show();
+        }
+    }
 
-            int result = imageScanner.scanImage(cameraImage);
+    private void showAddContactDialog(JSONObject jsonObject) {
+        View dialogView = getAddContactDialogView(jsonObject);
 
-            if (result != SCAN_FAIL_CODE) {
-                mCamera.stopPreview();
-                String qrResult = getQRScanResults();
-                scanState = ScanState.SCANNED;
-                showDialog(qrResult);
+        AlertDialog.Builder dialogBuilder = new AlertDialog.Builder(mContext);
+
+        dialogBuilder
+                .setView(dialogView)
+                .setTitle(R.string.add_contact_dialog_title)
+                .setPositiveButton(R.string.dialog_done, new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialogInterface, int i) {
+                        // do nothing
+                    }
+                });
+        dialogBuilder.create().show();
+    }
+
+    private View getAddContactDialogView(JSONObject jsonObject) {
+        LayoutInflater layoutInflater = LayoutInflater.from(mContext);
+        View view = layoutInflater.inflate(R.layout.add_contact_list_view, null);
+        ListView listView = (ListView) view.findViewById(R.id.lvAddContact);
+
+        ArrayList<AddContactListViewItem> listViewItems = new ArrayList<>();
+        for (AddContactListViewFactory factory : factories) {
+            AddContactListViewItem item = factory.getContactListViewItem(jsonObject);
+            if (item != null) {
+                listViewItems.add(item);
             }
         }
 
-    }
-
-    private String getQRScanResults() {
-        SymbolSet symbolSet = imageScanner.getResults();
-        StringBuilder sb = new StringBuilder();
-        for (Symbol symbol : symbolSet) {
-            sb.append(symbol.getData());
-        }
-        return sb.toString();
-    }
-
-    private void showDialog(String qrResults) {
-        AlertDialog.Builder builder = new AlertDialog.Builder(mContext);
-        builder.setMessage("QR CODE Result:" + qrResults)
-                .setPositiveButton("Scan Again?", new DialogInterface.OnClickListener() {
-                    @Override
-                    public void onClick(DialogInterface dialogInterface, int i) {
-                        scanState = ScanState.SCANNING;
-                        mCamera.startPreview();
-                    }
-                });
-        builder.create().show();
-    }
-
-    enum ScanState {
-        SCANNED,
-        SCANNING
+        AddContactListViewAdapter adapter = new AddContactListViewAdapter(mContext, listViewItems);
+        listView.setAdapter(adapter);
+        return view;
     }
 }

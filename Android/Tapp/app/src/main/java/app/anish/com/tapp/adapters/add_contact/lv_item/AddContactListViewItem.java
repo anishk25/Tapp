@@ -1,4 +1,4 @@
-package app.anish.com.tapp.adapters.data;
+package app.anish.com.tapp.adapters.add_contact.lv_item;
 
 import android.content.Context;
 import android.view.LayoutInflater;

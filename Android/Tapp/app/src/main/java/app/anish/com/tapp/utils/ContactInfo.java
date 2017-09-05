@@ -2,13 +2,15 @@ package app.anish.com.tapp.utils;
 
 import android.accounts.Account;
 import android.accounts.AccountManager;
+import android.content.ContentResolver;
 import android.content.Context;
 import android.database.Cursor;
+import android.net.Uri;
 import android.provider.ContactsContract;
+import android.provider.ContactsContract.PhoneLookup;
 import android.telephony.TelephonyManager;
 import android.util.Patterns;
 import java.util.regex.Pattern;
-import app.anish.com.tapp.utils.StringUtils;
 
 /**
  * Class for obtaining the users contact information
@@ -53,4 +55,20 @@ public final class ContactInfo {
         return null;
     }
 
+    public static String getContactId (Context context, String phoneNumber) {
+        Uri lookupUri = Uri.withAppendedPath(ContactsContract.PhoneLookup.CONTENT_FILTER_URI,
+                Uri.encode(phoneNumber));
+
+        String[] mPhoneNumberProjection = { PhoneLookup._ID, PhoneLookup.NUMBER, PhoneLookup.DISPLAY_NAME};
+        Cursor cursor = context.getContentResolver().query(lookupUri,mPhoneNumberProjection, null, null, null);
+
+        if (cursor != null) {
+            if (cursor.moveToFirst()) {
+                return cursor.getString(cursor.getColumnIndex(PhoneLookup._ID));
+            }
+            cursor.close();
+        }
+
+        return null;
+    }
 }

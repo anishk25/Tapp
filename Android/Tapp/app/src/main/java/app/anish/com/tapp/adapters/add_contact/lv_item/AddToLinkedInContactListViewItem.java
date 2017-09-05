@@ -1,4 +1,4 @@
-package app.anish.com.tapp.adapters.data;
+package app.anish.com.tapp.adapters.add_contact.lv_item;
 
 import android.app.AlertDialog;
 import android.app.Dialog;
@@ -31,7 +31,7 @@ public class AddToLinkedInContactListViewItem implements AddContactListViewItem 
 
     @Override
     public View getView(LayoutInflater layoutInflater, ViewGroup rootGroup) {
-        View view = layoutInflater.inflate(R.layout.add_contact_lv_item, rootGroup);
+        View view = layoutInflater.inflate(R.layout.add_contact_lv_item, null);
         ImageView image = (ImageView) view.findViewById(R.id.ivAddContactIcon);
         TextView textView = (TextView) view.findViewById(R.id.tvAddContact);
         image.setImageResource(R.drawable.ic_linkedin_icon);

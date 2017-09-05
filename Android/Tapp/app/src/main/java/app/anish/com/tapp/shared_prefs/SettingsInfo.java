@@ -31,21 +31,6 @@ public enum SettingsInfo implements SharePrefKeyInfo {
             return true;
         }
     },
-    EMAIL {
-        public String getInfoPrefKey() {
-            return "EMAIL";
-        }
-
-        public String getShareInfoPrefKey() { return "SHARE_EMAIL"; }
-
-        public String getTitle() {
-            return "Email";
-        }
-
-        public DialogFactory getDialogFactory() {
-            return new EmailSettingsDialogFactory();
-        }
-    },
     PHONE_NUMBER {
         public String getInfoPrefKey() {
             return "PHONE_NUMBER";
@@ -59,6 +44,25 @@ public enum SettingsInfo implements SharePrefKeyInfo {
 
         public DialogFactory getDialogFactory() {
             return new PhoneNumberSettingsDialogFactory();
+        }
+
+        public boolean isMandatoryShare() {
+            return true;
+        }
+    },
+    EMAIL {
+        public String getInfoPrefKey() {
+            return "EMAIL";
+        }
+
+        public String getShareInfoPrefKey() { return "SHARE_EMAIL"; }
+
+        public String getTitle() {
+            return "Email";
+        }
+
+        public DialogFactory getDialogFactory() {
+            return new EmailSettingsDialogFactory();
         }
     },
     FACEBOOK_NAME {
