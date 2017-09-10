@@ -1,5 +1,7 @@
 package app.anish.com.tapp.dialog_factories;
 
+import android.text.InputType;
+
 import app.anish.com.tapp.shared_prefs.SettingsInfo;
 
 /**
@@ -16,5 +18,10 @@ public class PhoneNumberSettingsDialogFactory extends SingleEditTextSettingsDial
     @Override
     protected String getKey() {
         return SettingsInfo.PHONE_NUMBER.getInfoPrefKey();
+    }
+
+    @Override
+    protected int getTypeOfInputText() {
+        return InputType.TYPE_CLASS_PHONE;
     }
 }

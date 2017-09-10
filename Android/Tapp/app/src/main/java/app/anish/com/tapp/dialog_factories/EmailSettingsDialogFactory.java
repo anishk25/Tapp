@@ -1,5 +1,8 @@
 package app.anish.com.tapp.dialog_factories;
 
+import android.text.InputType;
+import android.widget.EditText;
+
 import app.anish.com.tapp.shared_prefs.SettingsInfo;
 
 /**
@@ -16,5 +19,10 @@ public class EmailSettingsDialogFactory extends SingleEditTextSettingsDialogFact
     @Override
     protected String getKey() {
         return SettingsInfo.EMAIL.getInfoPrefKey();
+    }
+
+    @Override
+    protected int getTypeOfInputText() {
+        return InputType.TYPE_TEXT_VARIATION_EMAIL_ADDRESS;
     }
 }
