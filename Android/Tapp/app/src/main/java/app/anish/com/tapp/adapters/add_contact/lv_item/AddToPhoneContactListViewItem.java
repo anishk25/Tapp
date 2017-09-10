@@ -87,7 +87,7 @@ public class AddToPhoneContactListViewItem implements AddContactListViewItem {
     private ArrayList<ContentProviderOperation> getAddContactOperations() {
         ArrayList<ContentProviderOperation> operations = new ArrayList<>();
 
-        operations.add(getAddInitilizationOperation());
+        operations.add(getAddInititilizationOperation());
 
         String contactName = contactInfoData.get(SettingsInfo.OWNER_NAME.getInfoPrefKey());
         operations.add(getAddNameOperation(contactName));
@@ -118,7 +118,7 @@ public class AddToPhoneContactListViewItem implements AddContactListViewItem {
         return operations;
     }
 
-    private ContentProviderOperation getAddInitilizationOperation() {
+    private ContentProviderOperation getAddInititilizationOperation() {
         return ContentProviderOperation
                 .newInsert(ContactsContract.RawContacts.CONTENT_URI)
                 .withValue(ContactsContract.RawContacts.ACCOUNT_TYPE, null)
