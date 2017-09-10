@@ -40,4 +40,10 @@
 
     <string name = "add_contact_dialog_title">Add Contact</string>
 
+
+    <string name = "permissions_info_title">Read Contacts Permission needed</string>
+    <string name= "permission_info_body">These permissions are needed to get your name, phone number and email.
+        This will be automatically encoded in the QR code if you allow this permission. Otherwise you need
+        to manually enter them in the QR code settings</string>
+
 </resources>

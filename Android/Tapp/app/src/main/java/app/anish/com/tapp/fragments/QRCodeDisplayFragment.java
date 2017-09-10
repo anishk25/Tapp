@@ -153,8 +153,8 @@ public class QRCodeDisplayFragment extends Fragment implements View.OnClickListe
 
     private void showPermissionDialog() {
         AlertDialog alertDialog = new AlertDialog.Builder(getActivity())
-                .setTitle("Read Contacts Permission needed")
-                .setMessage("This permission is needed to get your name, phone number and email. This will be automatically encoded in the QR code if you allow this permission.")
+                .setTitle(R.string.permissions_info_title)
+                .setMessage(R.string.permission_info_body)
                 .setPositiveButton(android.R.string.yes, new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialogInterface, int i) {
@@ -178,6 +178,7 @@ public class QRCodeDisplayFragment extends Fragment implements View.OnClickListe
         Toast.makeText(mActivity, "Read contacts permission not granted, contact info will not be" +
                 " automatically encoded in QR code. Go to settings to enter contact info", Toast.LENGTH_LONG).show();
     }
+
 
     private boolean allPermissionsGranted(int[] grantResults) {
         for (int result : grantResults) {
