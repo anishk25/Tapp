@@ -106,7 +106,6 @@ public class QRCodeScanFragment extends Fragment {
         }
     }
 
-
     private void initializeCamera() throws CameraException {
         mCamera = getCameraInstance();
         if (mCamera != null) {

@@ -41,6 +41,7 @@ import app.anish.com.tapp.shared_prefs.SecuredSharedPrefs;
 import app.anish.com.tapp.shared_prefs.SettingsInfo;
 import app.anish.com.tapp.shared_prefs.SharePrefKeyInfo;
 import app.anish.com.tapp.shared_prefs.TappSharedPreferences;
+import app.anish.com.tapp.utils.FileUtils;
 
 /**
  * Created by akhattar on 4/11/17.
@@ -50,9 +51,11 @@ public class QRCodeDisplayFragment extends Fragment implements View.OnClickListe
 
     private static final String LOG_TAG = QRCodeDisplayFragment.class.getName();
     private static final String APP_OPENED_FIRST_TIME_KEY = "APP_OPENED_FIRST_TIME";
+    private static final String QR_IMAGE_FILE_NAME = "tapp_qrcode.png";
     private static final String QR_CODE_CHAR_SET = "ISO-8859-1";
     private static final int PERMISSIONS_REQUEST_READ_CONTACTS = 1;
     private static final int SETTINGS_ACTIVITY_RESULT_CODE = 2;
+    private static final int QR_CODE_BITMAP_WH = 400;
 
     private static final TappSharedPreferences sharedPrefs = TappSharedPreferences.getInstance();
 
@@ -61,6 +64,10 @@ public class QRCodeDisplayFragment extends Fragment implements View.OnClickListe
     private ImageView qrImage;
     private String currQRData;
     private ProgressBar qrProgressBar;
+
+    // used for making QR image loading faster for first time
+    // the QR code is displayed to the user
+    private boolean firstTimeDisplay = true;
 
 
 
@@ -204,7 +211,7 @@ public class QRCodeDisplayFragment extends Fragment implements View.OnClickListe
         Thread thread = new Thread(new Runnable() {
             public void run() {
                 try {
-                    final Bitmap bitmap = createQRCode(data, 400, 400);
+                    final Bitmap bitmap = getQRBitMap(data);
                     qrImage.post(new Runnable() {
                         public void run() {
                             qrImage.setImageBitmap(bitmap);
@@ -254,14 +261,27 @@ public class QRCodeDisplayFragment extends Fragment implements View.OnClickListe
         return result;
     }
 
+    private Bitmap getQRBitMap(String data) throws Exception {
+        Bitmap bitmap = null;
+        if (firstTimeDisplay) {
+            firstTimeDisplay = false;
+            bitmap = FileUtils.getImageFromInternalStorage(QR_IMAGE_FILE_NAME, getContext());
+        }
+
+        if (bitmap == null) {
+            bitmap = createQRCode(data, QR_CODE_BITMAP_WH, QR_CODE_BITMAP_WH);
+            FileUtils.saveImageToInternalStore(bitmap, QR_IMAGE_FILE_NAME, getContext());
+        }
+
+        return bitmap;
+    }
+
     private Bitmap createQRCode(String data, int width, int height) throws Exception {
         Bitmap bitmap = Bitmap.createBitmap(width, height, Bitmap.Config.RGB_565);
         Map<EncodeHintType, ErrorCorrectionLevel> hintMap = new HashMap<>();
         hintMap.put(EncodeHintType.ERROR_CORRECTION, ErrorCorrectionLevel.L);
 
         BitMatrix matrix;
-
-
         matrix = new MultiFormatWriter().encode(new String(data.getBytes(QR_CODE_CHAR_SET), QR_CODE_CHAR_SET),
                 BarcodeFormat.QR_CODE, width, height, hintMap);
 
