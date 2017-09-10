@@ -7,7 +7,6 @@ import android.hardware.Camera.PreviewCallback;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
-import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.Fragment;
 import android.support.v4.content.ContextCompat;
 import android.util.Log;
@@ -21,9 +20,7 @@ import android.widget.Toast;
 import app.anish.com.tapp.camera.CameraPreview;
 import app.anish.com.tapp.R;
 import app.anish.com.tapp.camera.CameraScanProcessor;
-import app.anish.com.tapp.camera.HardwareCameraScanProcessor;
 import app.anish.com.tapp.exceptions.CameraException;
-import retrofit2.http.POST;
 
 /**
  * Created by akhattar on 4/11/17.
@@ -113,8 +110,8 @@ public class QRCodeScanFragment extends Fragment {
     private void initializeCamera() throws CameraException {
         mCamera = getCameraInstance();
         if (mCamera != null) {
-            cameraScanProcessor = new HardwareCameraScanProcessor(mCamera, getContext());
             CameraPreview cameraPreview = new CameraPreview(getContext(), mCamera, previewCallback);
+            cameraScanProcessor = new CameraScanProcessor(cameraPreview, getContext());
             FrameLayout frameLayout = (FrameLayout) rootView.findViewById(R.id.flCamera);
             frameLayout.addView(cameraPreview);
         } else {

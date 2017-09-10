@@ -41,7 +41,6 @@ public class AddToPhoneContactListViewItem implements AddContactListViewItem {
         }
     }
 
-
     @Override
     public View getView(LayoutInflater layoutInflater, ViewGroup rootGroup) {
         View view = layoutInflater.inflate(R.layout.add_contact_lv_item, null);

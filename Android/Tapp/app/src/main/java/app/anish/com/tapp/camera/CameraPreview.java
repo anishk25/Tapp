@@ -23,7 +23,6 @@ public class CameraPreview extends SurfaceView implements SurfaceHolder.Callback
     private boolean mPreviewing = true;
     private boolean mSurfaceCreated = false;
 
-
     private final SurfaceHolder mHolder;
 
     // this will be used to deliver camera frames to the class that initializes CameraPreview
@@ -52,10 +51,8 @@ public class CameraPreview extends SurfaceView implements SurfaceHolder.Callback
         }
     };
 
-
     public CameraPreview(Context context, Camera camera, PreviewCallback previewCallback) {
         super(context);
-
         mHolder = getHolder();
         mHolder.addCallback(this);
         mHolder.setType(SurfaceHolder.SURFACE_TYPE_PUSH_BUFFERS);
@@ -66,10 +63,11 @@ public class CameraPreview extends SurfaceView implements SurfaceHolder.Callback
 
         mAutoFocusHandler = new Handler();
     }
+
     @Override
     public void surfaceCreated(SurfaceHolder surfaceHolder) {
         mSurfaceCreated = true;
-        startCamerPreview();
+        startCameraPreview();
     }
 
     @Override
@@ -80,7 +78,7 @@ public class CameraPreview extends SurfaceView implements SurfaceHolder.Callback
         }
 
         stopCameraPreview();
-        startCamerPreview();
+        startCameraPreview();
     }
 
     @Override
@@ -90,7 +88,7 @@ public class CameraPreview extends SurfaceView implements SurfaceHolder.Callback
         stopCameraPreview();
     }
 
-    private void stopCameraPreview() {
+    public void stopCameraPreview() {
         mPreviewing = false;
         mCamera.cancelAutoFocus();
         try {
@@ -100,7 +98,7 @@ public class CameraPreview extends SurfaceView implements SurfaceHolder.Callback
         }
     }
 
-    private void startCamerPreview() {
+    public void startCameraPreview() {
         try {
             mPreviewing = true;
             mCamera.setDisplayOrientation(CAMERA_ANGLE);
@@ -131,6 +129,10 @@ public class CameraPreview extends SurfaceView implements SurfaceHolder.Callback
 
     private void scheduleAutoFocus() {
         mAutoFocusHandler.postDelayed(doAutoFocus, 1000);
+    }
+
+    public Camera getCamera() {
+        return mCamera;
     }
 
 }
