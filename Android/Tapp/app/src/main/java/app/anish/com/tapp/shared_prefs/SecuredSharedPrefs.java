@@ -29,8 +29,9 @@ public enum SecuredSharedPrefs implements SharePrefKeyInfo{
         public String getShareInfoPrefKey () {
             return null;
         }
+    };
 
+    public boolean isMandatoryShare() {
+        return false;
     }
-
-
 }

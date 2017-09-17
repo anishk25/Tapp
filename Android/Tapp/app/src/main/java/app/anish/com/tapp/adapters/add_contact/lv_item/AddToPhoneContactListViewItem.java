@@ -1,8 +1,11 @@
 package app.anish.com.tapp.adapters.add_contact.lv_item;
 
+import android.app.Activity;
 import android.content.ContentProviderOperation;
 import android.content.Context;
 import android.provider.ContactsContract;
+import android.support.v4.app.ActivityCompat;
+import android.support.v4.app.Fragment;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -33,12 +36,6 @@ public class AddToPhoneContactListViewItem implements AddContactListViewItem {
 
     public AddToPhoneContactListViewItem(Map<String, String> contactInfoData) {
         this.contactInfoData = contactInfoData;
-        if (!contactInfoData.containsKey(SettingsInfo.OWNER_NAME.getInfoPrefKey())
-                || !contactInfoData.containsKey(SettingsInfo.PHONE_NUMBER.getInfoPrefKey())) {
-            throw new AssertionError("Bundle passed to " + AddToPhoneContactListViewItem.class.toString() +
-                    " must contain the keys " + SettingsInfo.OWNER_NAME.getInfoPrefKey() +
-                    "," + SettingsInfo.PHONE_NUMBER.getInfoPrefKey());
-        }
     }
 
     @Override
@@ -66,6 +63,18 @@ public class AddToPhoneContactListViewItem implements AddContactListViewItem {
             isUpdate = false;
         }
         performBatchOperation(context, operations, isUpdate);
+
+
+    }
+
+
+    private void validateContactInfoData() {
+        if (!contactInfoData.containsKey(SettingsInfo.OWNER_NAME.getInfoPrefKey())
+                || !contactInfoData.containsKey(SettingsInfo.PHONE_NUMBER.getInfoPrefKey())) {
+            throw new AssertionError("Bundle passed to " + AddToPhoneContactListViewItem.class.toString() +
+                    " must contain the keys " + SettingsInfo.OWNER_NAME.getInfoPrefKey() +
+                    "," + SettingsInfo.PHONE_NUMBER.getInfoPrefKey());
+        }
     }
 
 

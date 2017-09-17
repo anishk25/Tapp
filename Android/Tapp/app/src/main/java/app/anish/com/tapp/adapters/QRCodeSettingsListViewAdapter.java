@@ -24,13 +24,13 @@ import app.anish.com.tapp.shared_prefs.TappSharedPreferences;
  * Created by akhattar on 5/5/17.
  */
 
-public class SettingsListViewAdapter extends ArrayAdapter<SettingsInfo> {
+public class QRCodeSettingsListViewAdapter extends ArrayAdapter<SettingsInfo> {
 
     private Context mContext;
     private static TappSharedPreferences sharedPreferences = TappSharedPreferences.getInstance();
 
-    public SettingsListViewAdapter(@NonNull ArrayList<SettingsInfo> data, Context context) {
-        super(context, R.layout.cv_settings_base_content, data);
+    public QRCodeSettingsListViewAdapter(@NonNull ArrayList<SettingsInfo> data, Context context) {
+        super(context, R.layout.qr_settings_lv_item, data);
         mContext = getContext();
     }
 
@@ -44,7 +44,7 @@ public class SettingsListViewAdapter extends ArrayAdapter<SettingsInfo> {
 
         if (convertView == null) {
             LayoutInflater inflater = LayoutInflater.from(mContext);
-            convertView = inflater.inflate(R.layout.cv_settings_base_content, parent, false);
+            convertView = inflater.inflate(R.layout.qr_settings_lv_item, parent, false);
             viewHolder = createViewHolder(convertView);
             convertView.setTag(R.integer.view_holder_tag, viewHolder);
             checkAndDisableShareOption(settingsInfo, viewHolder);
@@ -60,8 +60,8 @@ public class SettingsListViewAdapter extends ArrayAdapter<SettingsInfo> {
 
     private ViewHolder createViewHolder(View rootView) {
         ViewHolder viewHolder = new ViewHolder();
-        viewHolder.tvTitle = (TextView) rootView.findViewById(R.id.tvSettingsItemTitle);
-        viewHolder.tvDetails = (TextView) rootView.findViewById(R.id.tvSettingsItemDetail);
+        viewHolder.tvTitle = (TextView) rootView.findViewById(R.id.tvQRSettingsItemTitle);
+        viewHolder.tvDetails = (TextView) rootView.findViewById(R.id.tvQRSettingsItemDetail);
         viewHolder.shareCheckBox = (CheckBox) rootView.findViewById(R.id.shareCheckBox);
         viewHolder.shareLabel = (TextView) rootView.findViewById(R.id.tvShareLabel);
         return viewHolder;

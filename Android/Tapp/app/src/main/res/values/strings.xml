@@ -45,5 +45,9 @@
     <string name= "permission_info_body">These permissions are needed to get your name, phone number and email.
         This will be automatically encoded in the QR code if you allow this permission. Otherwise you need
         to manually enter them in the QR code settings</string>
+    <string name = "qr_error_text">Name and Phone Number must be set in the QR Code settings in order for QR Code to be displayed</string>
+
+    <string name = "qr_code_settings_lv_item_title">QR Code Settings</string>
+    <string name = "permission_settings_lv_item_title">Permission Settings</string>
 
 </resources>

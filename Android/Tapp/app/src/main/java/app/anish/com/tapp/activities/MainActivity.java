@@ -89,6 +89,11 @@ public class MainActivity extends AppCompatActivity {
 
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+        checkIfDrawOverlayGranted(requestCode);
+    }
+
+    private void checkIfDrawOverlayGranted(int requestCode) {
         if (requestCode == PERM_REQUEST_CODE_DRAW_OVERLAYS && Build.VERSION.SDK_INT >= Build.VERSION_CODES.M
                 && !Settings.canDrawOverlays(this)) {
             Toast.makeText(this, "Screen Overlay Permission not granted. This will most likely cause " +

@@ -37,7 +37,7 @@ public abstract class SingleEditTextSettingsDialogFactory extends BinarySettings
 
     @Override
     protected int getLayoutId() {
-        return R.layout.settings_alertdialog_edittext;
+        return R.layout.qr_settings_alertdialog_edittext;
     }
 
     protected abstract String getKey();

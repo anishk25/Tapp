@@ -7,4 +7,6 @@ package app.anish.com.tapp.shared_prefs;
 public interface SharePrefKeyInfo {
     String getInfoPrefKey();
     String getShareInfoPrefKey();
+    boolean isMandatoryShare();
+
 }

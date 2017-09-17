@@ -43,7 +43,7 @@
             </intent-filter>
         </activity>
         <activity
-            android:name=".activities.SettingsActivity"
+            android:name=".activities.QRCodeSettingsActivity"
             android:label="@string/action_settings"
             android:screenOrientation="portrait"
             >

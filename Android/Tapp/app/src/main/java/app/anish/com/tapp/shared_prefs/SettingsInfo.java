@@ -1,5 +1,9 @@
 package app.anish.com.tapp.shared_prefs;
 
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+
 import app.anish.com.tapp.dialog_factories.DialogFactory;
 import app.anish.com.tapp.dialog_factories.EmailSettingsDialogFactory;
 import app.anish.com.tapp.dialog_factories.FacebookSettingsDialogFactory;
@@ -113,6 +117,15 @@ public enum SettingsInfo implements SharePrefKeyInfo {
         return false;
     }
 
+    public static List<SettingsInfo> getAllMandatorySettings() {
+        List<SettingsInfo> result = new ArrayList<>();
+        for (SettingsInfo info : SettingsInfo.values()) {
+            if (info.isMandatoryShare()) {
+                result.add(info);
+            }
+        }
+        return Collections.unmodifiableList(result);
+    }
 
     public String getInfoPrefix() {
         return "";

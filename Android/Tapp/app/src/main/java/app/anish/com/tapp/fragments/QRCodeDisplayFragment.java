@@ -19,6 +19,7 @@ import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.ProgressBar;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import com.google.zxing.BarcodeFormat;
@@ -32,16 +33,18 @@ import org.json.JSONObject;
 
 import java.util.HashMap;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Map;
 
 import app.anish.com.tapp.R;
-import app.anish.com.tapp.activities.SettingsActivity;
+import app.anish.com.tapp.activities.QRCodeSettingsActivity;
 import app.anish.com.tapp.utils.ContactInfo;
 import app.anish.com.tapp.shared_prefs.SecuredSharedPrefs;
 import app.anish.com.tapp.shared_prefs.SettingsInfo;
 import app.anish.com.tapp.shared_prefs.SharePrefKeyInfo;
 import app.anish.com.tapp.shared_prefs.TappSharedPreferences;
 import app.anish.com.tapp.utils.FileUtils;
+import app.anish.com.tapp.utils.StringUtils;
 
 /**
  * Created by akhattar on 4/11/17.
@@ -50,20 +53,24 @@ import app.anish.com.tapp.utils.FileUtils;
 public class QRCodeDisplayFragment extends Fragment implements View.OnClickListener {
 
     private static final String LOG_TAG = QRCodeDisplayFragment.class.getName();
-    private static final String APP_OPENED_FIRST_TIME_KEY = "APP_OPENED_FIRST_TIME";
+    private static final String APP_OPENED_FIRST_TIME_KEY = "appOpenFirstTime";
+
     private static final String QR_IMAGE_FILE_NAME = "tapp_qrcode.png";
     private static final String QR_CODE_CHAR_SET = "ISO-8859-1";
     private static final int PERMISSIONS_REQUEST_READ_CONTACTS = 1;
-    private static final int SETTINGS_ACTIVITY_RESULT_CODE = 2;
+    private static final int SETTINGS_ACTIVITY_REQUEST_CODE = 2;
     private static final int QR_CODE_BITMAP_WH = 400;
 
     private static final TappSharedPreferences sharedPrefs = TappSharedPreferences.getInstance();
+
+    private static final List<SettingsInfo> mandatorySettings = SettingsInfo.getAllMandatorySettings();
 
     // UI Elements
     private Activity mActivity;
     private ImageView qrImage;
     private String currQRData;
     private ProgressBar qrProgressBar;
+    private TextView tvQrErrorMsg;
 
     // used for making QR image loading faster for first time
     // the QR code is displayed to the user
@@ -109,14 +116,17 @@ public class QRCodeDisplayFragment extends Fragment implements View.OnClickListe
 
     @Override
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
-        if (requestCode == SETTINGS_ACTIVITY_RESULT_CODE) {
+        if (requestCode == SETTINGS_ACTIVITY_REQUEST_CODE) {
             drawQRCode();
         }
     }
 
+
+
     private void initUI(View rootView) {
         qrProgressBar = (ProgressBar) rootView.findViewById(R.id.pbQrCode);
         qrImage = (ImageView) rootView.findViewById(R.id.ivQrCode);
+        tvQrErrorMsg = (TextView) rootView.findViewById(R.id.tvQrErrorMsg);
         drawQRCode();
         Button settingsButton = (Button) rootView.findViewById(R.id.bQRCodeSettings);
         settingsButton.setOnClickListener(this);
@@ -124,8 +134,8 @@ public class QRCodeDisplayFragment extends Fragment implements View.OnClickListe
 
 
     private void launchSettingsActivity() {
-        Intent intent = new Intent(getContext(), SettingsActivity.class);
-        startActivityForResult(intent, SETTINGS_ACTIVITY_RESULT_CODE);
+        Intent intent = new Intent(getContext(), QRCodeSettingsActivity.class);
+        startActivityForResult(intent, SETTINGS_ACTIVITY_REQUEST_CODE);
     }
 
     private void populateContactInfo() {
@@ -145,11 +155,10 @@ public class QRCodeDisplayFragment extends Fragment implements View.OnClickListe
         sharedPrefs.saveString(SettingsInfo.OWNER_NAME.getInfoPrefKey(), ownerName);
         sharedPrefs.saveString(SettingsInfo.PHONE_NUMBER.getInfoPrefKey(), phoneNumber);
         sharedPrefs.saveString(SettingsInfo.EMAIL.getInfoPrefKey(), email);
-        sharedPrefs.saveBoolean(SettingsInfo.OWNER_NAME.getShareInfoPrefKey(), true);
-        sharedPrefs.saveBoolean(SettingsInfo.PHONE_NUMBER.getShareInfoPrefKey(), true);
-        sharedPrefs.saveBoolean(SettingsInfo.EMAIL.getShareInfoPrefKey(), true);
         sharedPrefs.commit();
     }
+
+
 
     private void showPermissionDialog() {
         AlertDialog alertDialog = new AlertDialog.Builder(getActivity())
@@ -174,6 +183,8 @@ public class QRCodeDisplayFragment extends Fragment implements View.OnClickListe
         alertDialog.show();
     }
 
+
+
     private void showPermNotGrantedToast() {
         Toast.makeText(mActivity, "Read contacts permission not granted, contact info will not be" +
                 " automatically encoded in QR code. Go to settings to enter contact info", Toast.LENGTH_LONG).show();
@@ -193,16 +204,33 @@ public class QRCodeDisplayFragment extends Fragment implements View.OnClickListe
     private void drawQRCode() {
         // do diff of current data on QR code and new data
         try {
-            String updatedData = getSavedContactInfo();
-            if (!updatedData.equals(currQRData)) {
+            JSONObject updatedData = getSavedContactInfo();
+            if (containsMandatorySettingsFields(updatedData)) {
                 drawQRCode(updatedData);
-                currQRData = updatedData;
+            } else {
+                displayQRErrorMsg();
             }
         } catch (Exception e) {
             Toast.makeText(mActivity, "Error drawing QR code", Toast.LENGTH_LONG).show();
         }
 
     }
+
+    private void drawQRCode(JSONObject jsonObject) throws Exception {
+        String dataStr = jsonObject.toString();
+        if (!dataStr.equals(currQRData)) {
+            tvQrErrorMsg.setVisibility(View.GONE);
+            drawQRCode(dataStr);
+            currQRData = dataStr;
+        }
+    }
+
+    private void displayQRErrorMsg() {
+        tvQrErrorMsg.setText(R.string.qr_error_text);
+        tvQrErrorMsg.setVisibility(View.VISIBLE);
+        qrImage.setVisibility(View.GONE);
+    }
+
 
 
     private void drawQRCode(final String data) throws Exception {
@@ -228,22 +256,22 @@ public class QRCodeDisplayFragment extends Fragment implements View.OnClickListe
         thread.start();
     }
 
-    private String getSavedContactInfo() throws JSONException {
+    private JSONObject getSavedContactInfo() throws JSONException {
         JSONObject obj1 = getSavedData(SettingsInfo.values());
         JSONObject obj2 = getSavedData(SecuredSharedPrefs.values());
         JSONObject result = mergeJSONObjects(obj1, obj2);
         Log.d(LOG_TAG, "Got QR ! \n" + result.toString());
-        return result.toString();
+        return result;
     }
 
 
     private JSONObject getSavedData(SharePrefKeyInfo[] keyInfoArr) throws JSONException {
         JSONObject jsonObject = new JSONObject();
         for (SharePrefKeyInfo info : keyInfoArr) {
-            boolean shareable = sharedPrefs.getBoolean(info.getShareInfoPrefKey());
-            if (shareable) {
-                String data = sharedPrefs.getString(info.getInfoPrefKey());
-                if (data != null) {
+            String data = sharedPrefs.getString(info.getInfoPrefKey());
+            if (data != null) {
+                boolean shareable = sharedPrefs.getBoolean(info.getShareInfoPrefKey()) || info.isMandatoryShare();
+                if (shareable) {
                     jsonObject.put(info.getInfoPrefKey(), data);
                 }
             }
@@ -260,6 +288,21 @@ public class QRCodeDisplayFragment extends Fragment implements View.OnClickListe
             result.put(key, value);
         }
         return result;
+    }
+
+
+    private boolean containsMandatorySettingsFields(JSONObject jsonObject) {
+        for (SettingsInfo settingsInfo : mandatorySettings) {
+            try {
+                String val = jsonObject.getString(settingsInfo.getInfoPrefKey());
+                if (StringUtils.stringIsEmpty(val)) {
+                    return false;
+                }
+            } catch (JSONException e){
+                return false;
+            }
+        }
+        return true;
     }
 
     private Bitmap getQRBitMap(String data) throws Exception {
