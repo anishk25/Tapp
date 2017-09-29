@@ -1,6 +1,8 @@
 <resources>
     <string name="app_name">Tapp</string>
-    <string name="action_settings">Settings</string>
+    <string name="action_qr_settings">QR Code Settings</string>
+    <string name="action_permissions_settings">Permissions Settings</string>
+    <string name="action_main_settings">Main Settings</string>
     <string name="section_format">Hello World from section: %1$d</string>
     <string name="qr_code_section">QR Code</string>
     <string name="scan_section">Scan</string>
@@ -50,4 +52,6 @@
     <string name = "qr_code_settings_lv_item_title">QR Code Settings</string>
     <string name = "permission_settings_lv_item_title">Permission Settings</string>
 
+    <string name = "read_contacts_permission">Read Contacts</string>
+    <string name = "write_contacts_permission">Write Contacts</string>
 </resources>

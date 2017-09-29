@@ -2,13 +2,13 @@ package app.anish.com.tapp.adapters.add_contact.builder;
 
 import org.json.JSONObject;
 
-import app.anish.com.tapp.adapters.add_contact.lv_item.AddContactListViewItem;
+import app.anish.com.tapp.adapters.ListViewItem;
 
 /**
- * Builder for {@link app.anish.com.tapp.adapters.add_contact.lv_item.AddContactListViewItem}
+ * Builder for {@link ListViewItem}
  * @author akhattar
  */
 
 public interface AddContactListViewFactory {
-    AddContactListViewItem getContactListViewItem(JSONObject jsonObject);
+    ListViewItem getContactListViewItem(JSONObject jsonObject);
 }

@@ -1,11 +1,16 @@
 package app.anish.com.tapp.adapters.add_contact.lv_item;
 
+import android.Manifest;
 import android.app.Activity;
 import android.content.ContentProviderOperation;
 import android.content.Context;
+import android.content.Intent;
+import android.content.pm.PackageManager;
+import android.os.Build;
+import android.os.Bundle;
 import android.provider.ContactsContract;
-import android.support.v4.app.ActivityCompat;
-import android.support.v4.app.Fragment;
+import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -15,12 +20,10 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
-import java.util.Map.Entry;
 
 import app.anish.com.tapp.R;
+import app.anish.com.tapp.adapters.ListViewItem;
 import app.anish.com.tapp.shared_prefs.SettingsInfo;
 import app.anish.com.tapp.utils.ContactInfo;
 
@@ -28,7 +31,7 @@ import app.anish.com.tapp.utils.ContactInfo;
  * @author akhattar
  */
 
-public class AddToPhoneContactListViewItem implements AddContactListViewItem {
+public class AddToPhoneContactListViewItem implements ListViewItem {
 
     private static final String LOG_TAG = AddToPhoneContactListViewItem.class.getSimpleName();
 
@@ -36,11 +39,12 @@ public class AddToPhoneContactListViewItem implements AddContactListViewItem {
 
     public AddToPhoneContactListViewItem(Map<String, String> contactInfoData) {
         this.contactInfoData = contactInfoData;
+        validateContactInfoData();
     }
 
     @Override
-    public View getView(LayoutInflater layoutInflater, ViewGroup rootGroup) {
-        View view = layoutInflater.inflate(R.layout.add_contact_lv_item, null);
+    public View getView(Context context, ViewGroup rootGroup) {
+        View view = LayoutInflater.from(context).inflate(R.layout.add_contact_lv_item, null);
         ImageView image = (ImageView) view.findViewById(R.id.ivAddContactIcon);
         TextView textView = (TextView) view.findViewById(R.id.tvAddContact);
         image.setImageResource(R.drawable.ic_phone_icon);
@@ -49,9 +53,20 @@ public class AddToPhoneContactListViewItem implements AddContactListViewItem {
     }
 
     @Override
-    public void performAddAction(Context context) {
-        ArrayList<ContentProviderOperation> operations = null;
+    public void performClickAction(Context context) {
 
+        try {
+            addContact(context);
+        } catch (SecurityException e) {
+            Intent intent = new Intent(context, AddContactsPermissionActivity.class);
+            intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+            context.startActivity(intent);
+        }
+    }
+
+
+    private void addContact(Context context) throws SecurityException {
+        ArrayList<ContentProviderOperation> operations;
         String phoneNumber = contactInfoData.get(SettingsInfo.PHONE_NUMBER.getInfoPrefKey());
         String contactId = ContactInfo.getContactId(context, phoneNumber);
         boolean isUpdate = true;
@@ -63,8 +78,6 @@ public class AddToPhoneContactListViewItem implements AddContactListViewItem {
             isUpdate = false;
         }
         performBatchOperation(context, operations, isUpdate);
-
-
     }
 
 
@@ -195,5 +208,32 @@ public class AddToPhoneContactListViewItem implements AddContactListViewItem {
     private void addEmailToOperationBuilder(ContentProviderOperation.Builder builder, String email) {
         builder.withValue(ContactsContract.CommonDataKinds.Email.DATA, email);
         builder.withValue(ContactsContract.CommonDataKinds.Email.TYPE, ContactsContract.CommonDataKinds.Email.TYPE_OTHER);
+    }
+
+
+
+
+    public static class AddContactsPermissionActivity extends Activity {
+
+        private static final int PERMISSIONS_REQUEST_READ_WRITE_CONTACTS = 2;
+
+        @Override
+        protected void onCreate(@Nullable Bundle savedInstanceState) {
+            super.onCreate(savedInstanceState);
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M && checkSelfPermission(Manifest.permission.READ_CONTACTS)
+                    != PackageManager.PERMISSION_GRANTED
+                    && checkSelfPermission(Manifest.permission.WRITE_CONTACTS) != PackageManager.PERMISSION_GRANTED) {
+                requestPermissions(new String[]{Manifest.permission.READ_CONTACTS, Manifest.permission.WRITE_CONTACTS}, PERMISSIONS_REQUEST_READ_WRITE_CONTACTS);
+            }
+        }
+
+        @Override
+        public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
+            if (requestCode == PERMISSIONS_REQUEST_READ_WRITE_CONTACTS) {
+                Toast.makeText(getApplicationContext(), "Permission granted, click on add contact again to add contact to your phone",
+                        Toast.LENGTH_LONG).show();
+                finish();
+            }
+        }
     }
 }

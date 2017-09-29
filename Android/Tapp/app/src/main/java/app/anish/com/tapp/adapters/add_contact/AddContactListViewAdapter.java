@@ -11,35 +11,34 @@ import android.widget.ArrayAdapter;
 import java.util.ArrayList;
 
 import app.anish.com.tapp.R;
-import app.anish.com.tapp.adapters.add_contact.lv_item.AddContactListViewItem;
+import app.anish.com.tapp.adapters.ListViewItem;
 
 /**
  * List View adapter for add contact items
  * @author akhattar
  */
 
-public class AddContactListViewAdapter extends ArrayAdapter<AddContactListViewItem> {
+public class AddContactListViewAdapter extends ArrayAdapter<ListViewItem> {
 
 
-    public AddContactListViewAdapter (Context context, ArrayList<AddContactListViewItem> data) {
+    public AddContactListViewAdapter (Context context, ArrayList<ListViewItem> data) {
         super(context, R.layout.add_contact_lv_item, data);
     }
 
     @NonNull
     @Override
     public View getView(int position, @Nullable View convertView, @NonNull ViewGroup parent) {
-        LayoutInflater layoutInflater = LayoutInflater.from(getContext());
-        AddContactListViewItem item = getItem(position);
-        View view = item.getView(layoutInflater, parent);
+        ListViewItem item = getItem(position);
+        View view = item.getView(getContext(), parent);
         setupViewOnClickListener(view, item);
         return view;
     }
 
-    private void setupViewOnClickListener(final View view, final AddContactListViewItem item) {
+    private void setupViewOnClickListener(final View view, final ListViewItem item) {
         view.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                item.performAddAction(getContext());
+                item.performClickAction(getContext());
             }
         });
     }

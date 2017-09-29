@@ -76,14 +76,13 @@ public class QRCodeDisplayFragment extends Fragment implements View.OnClickListe
     // the QR code is displayed to the user
     private boolean firstTimeDisplay = true;
 
-
-
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         mActivity = getActivity();
         populateContactInfo();
     }
+
 
     @Nullable
     @Override

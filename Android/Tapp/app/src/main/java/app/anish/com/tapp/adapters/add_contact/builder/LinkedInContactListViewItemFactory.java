@@ -5,7 +5,7 @@ import android.util.Log;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import app.anish.com.tapp.adapters.add_contact.lv_item.AddContactListViewItem;
+import app.anish.com.tapp.adapters.ListViewItem;
 import app.anish.com.tapp.adapters.add_contact.lv_item.AddToLinkedInContactListViewItem;
 import app.anish.com.tapp.shared_prefs.SecuredSharedPrefs;
 import app.anish.com.tapp.shared_prefs.SettingsInfo;
@@ -22,7 +22,7 @@ public class LinkedInContactListViewItemFactory implements AddContactListViewFac
     private static final String LOG_TAG = LinkedInContactListViewItemFactory.class.getSimpleName();
 
     @Override
-    public AddContactListViewItem getContactListViewItem(JSONObject jsonObject) {
+    public ListViewItem getContactListViewItem(JSONObject jsonObject) {
         if (jsonObject.has(SecuredSharedPrefs.LINKEDIN_ID.getInfoPrefKey())) {
             try {
                 String linkedInId = jsonObject.getString(SecuredSharedPrefs.LINKEDIN_ID.getInfoPrefKey());

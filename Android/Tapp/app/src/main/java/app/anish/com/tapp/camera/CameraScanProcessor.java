@@ -26,7 +26,7 @@ import app.anish.com.tapp.adapters.add_contact.builder.AddContactListViewFactory
 import app.anish.com.tapp.adapters.add_contact.builder.FacebookContactListViewItemFactory;
 import app.anish.com.tapp.adapters.add_contact.builder.LinkedInContactListViewItemFactory;
 import app.anish.com.tapp.adapters.add_contact.builder.PhoneContactListViewItemFactory;
-import app.anish.com.tapp.adapters.add_contact.lv_item.AddContactListViewItem;
+import app.anish.com.tapp.adapters.ListViewItem;
 
 /**
  * Interface for processing Camera Data through
@@ -138,9 +138,9 @@ public class CameraScanProcessor {
         View view = layoutInflater.inflate(R.layout.add_contact_list_view, null);
         ListView listView = (ListView) view.findViewById(R.id.lvAddContact);
 
-        ArrayList<AddContactListViewItem> listViewItems = new ArrayList<>();
+        ArrayList<ListViewItem> listViewItems = new ArrayList<>();
         for (AddContactListViewFactory factory : factories) {
-            AddContactListViewItem item = factory.getContactListViewItem(jsonObject);
+            ListViewItem item = factory.getContactListViewItem(jsonObject);
             if (item != null) {
                 listViewItems.add(item);
             }

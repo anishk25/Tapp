@@ -13,13 +13,14 @@ import android.widget.ImageView;
 import android.widget.TextView;
 
 import app.anish.com.tapp.R;
+import app.anish.com.tapp.adapters.ListViewItem;
 import app.anish.com.tapp.utils.PackageUtils;
 
 /**
  * Created by akhattar on 8/16/17.
  */
 
-public class AddToLinkedInContactListViewItem implements AddContactListViewItem {
+public class AddToLinkedInContactListViewItem implements ListViewItem {
 
     private final String linkedInId;
     private final String contactName;
@@ -30,8 +31,8 @@ public class AddToLinkedInContactListViewItem implements AddContactListViewItem 
     }
 
     @Override
-    public View getView(LayoutInflater layoutInflater, ViewGroup rootGroup) {
-        View view = layoutInflater.inflate(R.layout.add_contact_lv_item, null);
+    public View getView(Context context, ViewGroup rootGroup) {
+        View view = LayoutInflater.from(context).inflate(R.layout.add_contact_lv_item, null);
         ImageView image = (ImageView) view.findViewById(R.id.ivAddContactIcon);
         TextView textView = (TextView) view.findViewById(R.id.tvAddContact);
         image.setImageResource(R.drawable.ic_linkedin_icon);
@@ -40,7 +41,7 @@ public class AddToLinkedInContactListViewItem implements AddContactListViewItem 
     }
 
     @Override
-    public void performAddAction(final Context context) {
+    public void performClickAction(final Context context) {
         AlertDialog.Builder builder = new AlertDialog.Builder(context)
                 .setMessage("Do you want to visit " + contactName + " 's LinkedIn page?")
                 .setPositiveButton(R.string.dialog_ok, new DialogInterface.OnClickListener() {

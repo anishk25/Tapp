@@ -24,6 +24,9 @@ android {
             buildConfigField "String", "LINKEDIN_SECRET_KEY", "\"oqHFGLA1FYrqTmAT\""
         }
     }
+    configurations.all {
+        resolutionStrategy.force 'com.google.code.findbugs:jsr305:2.0.1'
+    }
 }
 
 dependencies {
@@ -39,6 +42,8 @@ dependencies {
     compile 'com.squareup.okhttp3:okhttp:3.8.1'
     compile 'com.squareup.retrofit2:retrofit:2.3.0'
     compile 'com.squareup.retrofit2:converter-gson:2.1.0'
+    compile 'com.google.guava:guava:23.0-android'
+
     testCompile 'junit:junit:4.12'
     compile files('libs/zbar.jar')
 }

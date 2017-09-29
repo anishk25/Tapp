@@ -8,7 +8,7 @@ import org.json.JSONObject;
 import java.util.HashMap;
 import java.util.Map;
 
-import app.anish.com.tapp.adapters.add_contact.lv_item.AddContactListViewItem;
+import app.anish.com.tapp.adapters.ListViewItem;
 import app.anish.com.tapp.adapters.add_contact.lv_item.AddToPhoneContactListViewItem;
 import app.anish.com.tapp.shared_prefs.SettingsInfo;
 
@@ -26,7 +26,7 @@ public class PhoneContactListViewItemFactory implements AddContactListViewFactor
             SettingsInfo.PHONE_NUMBER, SettingsInfo.EMAIL};
 
     @Override
-    public AddContactListViewItem getContactListViewItem(JSONObject jsonObject) {
+    public ListViewItem getContactListViewItem(JSONObject jsonObject) {
 
         Map<String, String> dataMap = new HashMap<>();
 
