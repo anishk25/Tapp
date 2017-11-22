@@ -5,9 +5,11 @@ import android.app.Dialog;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.hardware.Camera;
+import android.support.design.widget.FloatingActionButton;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.ListView;
+import android.widget.ProgressBar;
 import android.widget.Toast;
 
 import net.sourceforge.zbar.Image;
@@ -27,6 +29,7 @@ import app.anish.com.tapp.adapters.add_contact.builder.FacebookContactListViewIt
 import app.anish.com.tapp.adapters.add_contact.builder.LinkedInContactListViewItemFactory;
 import app.anish.com.tapp.adapters.add_contact.builder.PhoneContactListViewItemFactory;
 import app.anish.com.tapp.adapters.ListViewItem;
+import app.anish.com.tapp.shared_prefs.TappSharedPreferences;
 
 /**
  * Interface for processing Camera Data through
@@ -40,6 +43,9 @@ import app.anish.com.tapp.adapters.ListViewItem;
 public class CameraScanProcessor {
 
     private static final int SCAN_FAIL_CODE = 0;
+    private static final String LAST_QR_SCAN_SHARED_PREF_KEY = "LastQrScan";
+
+    private static final TappSharedPreferences sharedPrefs = TappSharedPreferences.getInstance();
 
     private static final AddContactListViewFactory[] factories = {
             new PhoneContactListViewItemFactory(), new FacebookContactListViewItemFactory(),
@@ -50,6 +56,11 @@ public class CameraScanProcessor {
     private ScanState scanState;
     private final CameraPreview cameraPreview;
     protected final Context mContext;
+
+    private String lastQRScan;
+
+    private FloatingActionButton lastQRScanButton;
+    private ProgressBar progBarCamScan;
 
 
     public CameraScanProcessor(CameraPreview cameraPreview, Context context) {
@@ -67,18 +78,43 @@ public class CameraScanProcessor {
         if (scanState == ScanState.SCANNING) {
             Camera.Parameters parameters = cameraPreview.getCamera().getParameters();
             Camera.Size size = parameters.getPreviewSize();
-
             Image cameraImage = new Image(size.width, size.height, "Y800");
             cameraImage.setData(bytes);
-
             int result = imageScanner.scanImage(cameraImage);
-
             if (result != SCAN_FAIL_CODE) {
-                scanState = ScanState.SCANNED;
-                cameraPreview.stopCameraPreview();
-                String qrResult = getQRScanResults();
-                showAddContactDialog(qrResult);
+                progBarCamScan.setVisibility(View.VISIBLE);
+                processScanSuccess();
+                progBarCamScan.setVisibility(View.GONE);
             }
+        }
+    }
+
+    public void setLastQRScanButton(FloatingActionButton lastQRScanButton) {
+        this.lastQRScanButton = lastQRScanButton;
+        if (lastQRScan == null) {
+            lastQRScan = sharedPrefs.getString(LAST_QR_SCAN_SHARED_PREF_KEY);
+            if (lastQRScan != null) {
+                this.lastQRScanButton.setVisibility(View.VISIBLE);
+            }
+        }
+    }
+
+    public void setProgBarCamScan(ProgressBar progBarCamScan) {
+        this.progBarCamScan = progBarCamScan;
+    }
+
+    public void showLastQRScanDialog() {
+        if (scanState == ScanState.SCANNING) {
+           showAddContactDialog();
+        }
+    }
+
+    private void processScanSuccess() {
+        lastQRScan = getQRScanResults();
+        sharedPrefs.saveString(LAST_QR_SCAN_SHARED_PREF_KEY, lastQRScan);
+        showAddContactDialog();
+        if (lastQRScanButton.getVisibility() == View.GONE) {
+            lastQRScanButton.setVisibility(View.VISIBLE);
         }
     }
 
@@ -93,9 +129,10 @@ public class CameraScanProcessor {
     }
 
 
-    private void showAddContactDialog(String qrCodeData) {
+    private void showAddContactDialog() {
         try {
-            JSONObject jsonObject = new JSONObject(qrCodeData);
+            setScanState(ScanState.SCANNED);
+            JSONObject jsonObject = new JSONObject(lastQRScan);
             showAddContactDialog(jsonObject);
         } catch (JSONException e) {
             Toast.makeText(mContext, "Error : Malformed QR code data", Toast.LENGTH_LONG).show();
@@ -105,9 +142,9 @@ public class CameraScanProcessor {
 
     private void showAddContactDialog(JSONObject jsonObject) {
         View dialogView = getAddContactDialogView(jsonObject);
-        AlertDialog alertDialog = createAddContactDialog(dialogView);
-        setupOnDismissListenerForDialog(alertDialog);
-        alertDialog.show();
+        AlertDialog dialog = createAddContactDialog(dialogView);
+        setupOnDismissListenerForDialog(dialog);
+        dialog.show();
     }
 
     private AlertDialog createAddContactDialog(View dialogView) {
@@ -127,11 +164,13 @@ public class CameraScanProcessor {
         dialog.setOnDismissListener(new DialogInterface.OnDismissListener() {
             @Override
             public void onDismiss(DialogInterface dialogInterface) {
-                cameraPreview.startCameraPreview();
-                scanState = ScanState.SCANNING;
+                setScanState(ScanState.SCANNING);
             }
         });
     }
+
+
+
 
     private View getAddContactDialogView(JSONObject jsonObject) {
         LayoutInflater layoutInflater = LayoutInflater.from(mContext);
@@ -149,6 +188,18 @@ public class CameraScanProcessor {
         AddContactListViewAdapter adapter = new AddContactListViewAdapter(mContext, listViewItems);
         listView.setAdapter(adapter);
         return view;
+    }
+
+    private void setScanState(ScanState scanState) {
+        this.scanState = scanState;
+        switch (scanState){
+            case SCANNED:
+                cameraPreview.stopCameraPreview();
+                break;
+            case SCANNING:
+                cameraPreview.startCameraPreview();
+                break;
+        }
     }
 
     enum ScanState {

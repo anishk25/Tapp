@@ -7,6 +7,7 @@ import android.hardware.Camera.PreviewCallback;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
+import android.support.design.widget.FloatingActionButton;
 import android.support.v4.app.Fragment;
 import android.support.v4.content.ContextCompat;
 import android.util.Log;
@@ -15,6 +16,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.FrameLayout;
+import android.widget.ProgressBar;
 import android.widget.Toast;
 
 import app.anish.com.tapp.camera.CameraPreview;
@@ -27,7 +29,7 @@ import app.anish.com.tapp.exceptions.CameraException;
  */
 
 @SuppressWarnings("deprecation")
-public class QRCodeScanFragment extends Fragment {
+public class QRCodeScanFragment extends Fragment implements View.OnClickListener {
 
     private static final String TAG = QRCodeScanFragment.class.getSimpleName();
     private static final int PERMISSIONS_REQUEST_FOR_CAMERA = 1;
@@ -41,6 +43,8 @@ public class QRCodeScanFragment extends Fragment {
 
     private Camera mCamera;
     private Button reqCamPermButton;
+    private FloatingActionButton lastQrScanButton;
+    private ProgressBar progBarCamScan;
 
     private CameraScanProcessor cameraScanProcessor;
     private View rootView;
@@ -49,7 +53,7 @@ public class QRCodeScanFragment extends Fragment {
     @Override
     public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
         rootView = inflater.inflate(R.layout.qr_code_scan, container, false);
-        initReqPermButton();
+        initUI();
         return rootView;
     }
 
@@ -83,13 +87,13 @@ public class QRCodeScanFragment extends Fragment {
     }
 
     private void checkCameraPermResult(int [] permGrantResults) {
-        if (!(permGrantResults.length > 0 && permGrantResults[0] == PackageManager.PERMISSION_GRANTED)) {
-            reqCamPermButton.setVisibility(View.VISIBLE);
-            reqCamPermButton.setEnabled(true);
-        } else {
+        if (permGrantResults.length > 0 && permGrantResults[0] == PackageManager.PERMISSION_GRANTED) {
             reqCamPermButton.setVisibility(View.GONE);
             reqCamPermButton.setEnabled(false);
             startCameraPreview();
+        } else {
+            reqCamPermButton.setVisibility(View.VISIBLE);
+            reqCamPermButton.setEnabled(true);
         }
     }
 
@@ -110,7 +114,7 @@ public class QRCodeScanFragment extends Fragment {
         mCamera = getCameraInstance();
         if (mCamera != null) {
             CameraPreview cameraPreview = new CameraPreview(getContext(), mCamera, previewCallback);
-            cameraScanProcessor = new CameraScanProcessor(cameraPreview, getContext());
+            initCameraScanProcessor(cameraPreview);
             FrameLayout frameLayout = (FrameLayout) rootView.findViewById(R.id.flCamera);
             frameLayout.addView(cameraPreview);
         } else {
@@ -118,17 +122,20 @@ public class QRCodeScanFragment extends Fragment {
         }
     }
 
-    private void initReqPermButton() {
+    private void initCameraScanProcessor(CameraPreview cameraPreview) {
+        cameraScanProcessor = new CameraScanProcessor(cameraPreview, getContext());
+        cameraScanProcessor.setLastQRScanButton(lastQrScanButton);
+        cameraScanProcessor.setProgBarCamScan(progBarCamScan);
+    }
+    private void initUI() {
         reqCamPermButton = (Button) rootView.findViewById(R.id.bReqCameraPerm);
         reqCamPermButton.setVisibility(View.GONE);
-        reqCamPermButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                if (ContextCompat.checkSelfPermission(getContext(), Manifest.permission.CAMERA) != PackageManager.PERMISSION_GRANTED) {
-                    requestPermissions(new String[]{Manifest.permission.CAMERA}, PERMISSIONS_REQUEST_FOR_CAMERA);
-                }
-            }
-        });
+        reqCamPermButton.setOnClickListener(this);
+
+        lastQrScanButton = (FloatingActionButton) rootView.findViewById(R.id.fabLastQRScan);
+        lastQrScanButton.setOnClickListener(this);
+
+        progBarCamScan = (ProgressBar) rootView.findViewById(R.id.pbCameraScan);
     }
 
     private static Camera getCameraInstance() {
@@ -139,4 +146,19 @@ public class QRCodeScanFragment extends Fragment {
             return null;
         }
     }
+
+    @Override
+    public void onClick(View view) {
+        switch(view.getId()) {
+            case R.id.bReqCameraPerm:
+                if (ContextCompat.checkSelfPermission(getContext(), Manifest.permission.CAMERA) != PackageManager.PERMISSION_GRANTED) {
+                    requestPermissions(new String[]{Manifest.permission.CAMERA}, PERMISSIONS_REQUEST_FOR_CAMERA);
+                }
+                break;
+            case R.id.fabLastQRScan:
+                cameraScanProcessor.showLastQRScanDialog();
+                break;
+        }
+    }
+
 }

@@ -32,7 +32,7 @@ public abstract class QRCodeListViewItem implements ListViewItem {
         LayoutInflater layoutInflater = LayoutInflater.from(context);
         View view = layoutInflater.inflate(R.layout.qr_settings_lv_item, rootViewGroup, false);
         viewHolder = createViewHolder(view);
-        checkAndDisableShareOption();
+        checkAndDisableShareOption(view);
         setupCheckBoxListener(context);
         return view;
     }
@@ -73,8 +73,10 @@ public abstract class QRCodeListViewItem implements ListViewItem {
         return viewHolder;
     }
 
-    private void checkAndDisableShareOption() {
+    private void checkAndDisableShareOption(View rootView) {
         if(getSettingsInfo().isMandatoryShare()) {
+
+
             viewHolder.shareCheckBox.setVisibility(View.GONE);
             viewHolder.shareLabel.setVisibility(View.GONE);
         }

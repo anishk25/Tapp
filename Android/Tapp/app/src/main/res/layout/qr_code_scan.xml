@@ -20,4 +20,26 @@
         android:id="@+id/flCamera"
         />
 
+    <android.support.design.widget.FloatingActionButton
+        android:id="@+id/fabLastQRScan"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentRight="true"
+        android:layout_alignParentEnd="true"
+        android:layout_alignParentBottom="true"
+        android:layout_marginRight="24dp"
+        android:layout_marginBottom="24dp"
+        android:src="@drawable/ic_qr_code_holder_white"
+        android:layout_gravity="bottom|end"
+        android:visibility="gone" />
+
+    <ProgressBar
+        android:id="@+id/pbCameraScan"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_centerHorizontal="true"
+        android:layout_centerVertical="true"
+        android:visibility="gone"
+        />
+
 </RelativeLayout>

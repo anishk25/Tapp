@@ -116,12 +116,11 @@ public class LinkedInDialogFragment extends Fragment implements View.OnClickList
 
     private void loginToLinkedIn() {
         toggleProgressBar(true);
-//        if (PackageUtils.isPackageInstalled(getContext(), PackageUtils.LINKEDIN_PACKAGE_NAME)) {
-//            getLinkedInInfoThroughApp();
-//        } else {
-//            getLinkedInInfoThroughWeb();
-//        }
-        getLinkedInInfoThroughWeb();
+        if (PackageUtils.isPackageInstalled(getContext(), PackageUtils.LINKEDIN_PACKAGE_NAME)) {
+            getLinkedInInfoThroughApp();
+        } else {
+            getLinkedInInfoThroughWeb();
+        }
     }
 
     private void getLinkedInInfoThroughApp() {

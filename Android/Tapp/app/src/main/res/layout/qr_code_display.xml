@@ -31,7 +31,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
                 android:id="@+id/ivQrCode"
-                android:src="@drawable/ic_qrcode_holder"
+                android:src="@drawable/ic_qrcode_holder_black"
                 android:layout_gravity="center_horizontal"
                 />
 

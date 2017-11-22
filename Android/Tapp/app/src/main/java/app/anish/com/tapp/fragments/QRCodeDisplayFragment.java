@@ -105,6 +105,7 @@ public class QRCodeDisplayFragment extends Fragment implements View.OnClickListe
     public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
         if (requestCode == PERMISSIONS_REQUEST_READ_CONTACTS) {
             if (allPermissionsGranted(grantResults)) {
+
                 populateSharedPrefs();
                 drawQRCode();
             } else {
