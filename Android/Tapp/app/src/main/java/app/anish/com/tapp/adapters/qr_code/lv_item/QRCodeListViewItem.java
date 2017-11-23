@@ -16,6 +16,7 @@ import app.anish.com.tapp.adapters.ListViewItem;
 import app.anish.com.tapp.dialog_factories.DialogFactory;
 import app.anish.com.tapp.shared_prefs.SettingsInfo;
 import app.anish.com.tapp.shared_prefs.TappSharedPreferences;
+import app.anish.com.tapp.utils.StringUtils;
 
 /**
  * Created by anish_khattar25 on 9/17/17.
@@ -64,6 +65,21 @@ public abstract class QRCodeListViewItem implements ListViewItem {
         return details == null ? "Not Set" : prefix + details;
     }
 
+    private void setupDismissListenerOnDialog() {
+        generatedDialog.setOnDismissListener(new DialogInterface.OnDismissListener() {
+            @Override
+            public void onDismiss(DialogInterface dialogInterface) {
+                String dispString = getDetailDispString(getSettingsInfo());
+                viewHolder.tvDetails.setText(dispString);
+
+                String data = sharedPreferences.getString(getSettingsInfo().getInfoPrefKey());
+                if (StringUtils.stringIsEmpty(data)) {
+                    viewHolder.shareCheckBox.setChecked(false);
+                }
+            }
+        });
+    }
+
     private ViewHolder createViewHolder(View rootView) {
         ViewHolder viewHolder = new ViewHolder();
         viewHolder.tvTitle = (TextView) rootView.findViewById(R.id.tvQRSettingsItemTitle);
@@ -76,21 +92,11 @@ public abstract class QRCodeListViewItem implements ListViewItem {
     private void checkAndDisableShareOption(View rootView) {
         if(getSettingsInfo().isMandatoryShare()) {
 
-
             viewHolder.shareCheckBox.setVisibility(View.GONE);
             viewHolder.shareLabel.setVisibility(View.GONE);
         }
     }
 
-    private void setupDismissListenerOnDialog() {
-        generatedDialog.setOnDismissListener(new DialogInterface.OnDismissListener() {
-            @Override
-            public void onDismiss(DialogInterface dialogInterface) {
-                String dispString = getDetailDispString(getSettingsInfo());
-                viewHolder.tvDetails.setText(dispString);
-            }
-        });
-    }
 
     private void setupCheckBoxListener(final Context context) {
         viewHolder.shareCheckBox.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
@@ -109,7 +115,8 @@ public abstract class QRCodeListViewItem implements ListViewItem {
     protected abstract SettingsInfo getSettingsInfo();
     protected abstract DialogFactory getDialogFactory();
 
-    private class ViewHolder {
+
+     private class ViewHolder {
         private TextView tvTitle;
         private TextView tvDetails;
         private TextView shareLabel;

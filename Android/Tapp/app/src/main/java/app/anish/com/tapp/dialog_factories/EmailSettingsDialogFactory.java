@@ -1,6 +1,7 @@
 package app.anish.com.tapp.dialog_factories;
 
 import android.text.InputType;
+import android.util.Patterns;
 import android.widget.EditText;
 
 import app.anish.com.tapp.shared_prefs.SettingsInfo;
@@ -24,5 +25,15 @@ public class EmailSettingsDialogFactory extends SingleEditTextSettingsDialogFact
     @Override
     protected int getTypeOfInputText() {
         return InputType.TYPE_TEXT_VARIATION_EMAIL_ADDRESS;
+    }
+
+    @Override
+    protected boolean isDataInValidFormat(String data) {
+        return Patterns.EMAIL_ADDRESS.matcher(data).matches();
+    }
+
+    @Override
+    protected String getValidationErrorMsg() {
+        return "Email address is not in correct format.";
     }
 }

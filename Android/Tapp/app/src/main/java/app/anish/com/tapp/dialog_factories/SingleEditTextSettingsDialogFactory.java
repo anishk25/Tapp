@@ -4,6 +4,7 @@ import android.content.Context;
 import android.text.InputType;
 import android.view.View;
 import android.widget.EditText;
+import android.widget.Toast;
 
 import app.anish.com.tapp.R;
 import app.anish.com.tapp.shared_prefs.TappSharedPreferences;
@@ -30,9 +31,20 @@ public abstract class SingleEditTextSettingsDialogFactory extends BinarySettings
         String data  = ((EditText) rootView.findViewById(R.id.etSettingsDialogValue)).getText().toString();
         if (StringUtils.stringIsEmpty(data)) {
             TappSharedPreferences.getInstance().deleteKey(getKey());
+        } else if (!isDataInValidFormat(data)){
+            Toast.makeText(context, getValidationErrorMsg(), Toast.LENGTH_LONG).show();
         } else {
             TappSharedPreferences.getInstance().saveString(getKey(), data);
         }
+    }
+
+
+    protected boolean isDataInValidFormat(String data) {
+        return true;
+    }
+
+    protected String getValidationErrorMsg() {
+        return null;
     }
 
     @Override

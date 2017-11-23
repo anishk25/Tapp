@@ -1,7 +1,10 @@
 package app.anish.com.tapp.adapters.qr_code.lv_item;
 
+import android.content.DialogInterface;
+
 import app.anish.com.tapp.dialog_factories.DialogFactory;
 import app.anish.com.tapp.dialog_factories.FacebookSettingsDialogFactory;
+import app.anish.com.tapp.shared_prefs.SecuredSharedPrefs;
 import app.anish.com.tapp.shared_prefs.SettingsInfo;
 
 /**

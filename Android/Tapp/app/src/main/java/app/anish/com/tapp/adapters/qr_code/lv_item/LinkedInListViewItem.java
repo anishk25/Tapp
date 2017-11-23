@@ -9,8 +9,6 @@ import app.anish.com.tapp.shared_prefs.SettingsInfo;
  */
 
 public class LinkedInListViewItem extends QRCodeListViewItem{
-
-
     @Override
     protected SettingsInfo getSettingsInfo() {
         return SettingsInfo.LINKEDIN_NAME;
