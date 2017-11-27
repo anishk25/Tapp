@@ -25,7 +25,6 @@ import app.anish.com.tapp.utils.StringUtils;
 public abstract class QRCodeListViewItem implements ListViewItem {
 
     private static TappSharedPreferences sharedPreferences = TappSharedPreferences.getInstance();
-    private Dialog generatedDialog;
     private ViewHolder viewHolder;
 
     @Override
@@ -40,11 +39,9 @@ public abstract class QRCodeListViewItem implements ListViewItem {
 
     @Override
     public void performClickAction(Context context) {
-        if (generatedDialog == null) {
-            generatedDialog = getDialogFactory().getDialog(context);
-            setupDismissListenerOnDialog();
-        }
-        generatedDialog.show();
+        Dialog dialog = getDialogFactory().getDialog(context);
+        setupDismissListenerOnDialog(dialog);
+        dialog.show();
     }
 
 
@@ -65,8 +62,8 @@ public abstract class QRCodeListViewItem implements ListViewItem {
         return details == null ? "Not Set" : prefix + details;
     }
 
-    private void setupDismissListenerOnDialog() {
-        generatedDialog.setOnDismissListener(new DialogInterface.OnDismissListener() {
+    private void setupDismissListenerOnDialog(Dialog dialog) {
+        dialog.setOnDismissListener(new DialogInterface.OnDismissListener() {
             @Override
             public void onDismiss(DialogInterface dialogInterface) {
                 String dispString = getDetailDispString(getSettingsInfo());

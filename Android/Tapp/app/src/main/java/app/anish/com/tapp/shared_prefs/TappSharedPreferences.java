@@ -39,7 +39,7 @@ public final class TappSharedPreferences extends Observable {
     }
 
     public void saveString(String key, String value) {
-        if (!value.equals(getString(key))) {
+        if (value != null && !value.equals(getString(key))) {
             doEdit(key);
             mEditor.putString(key, value);
             doCommit(key);

@@ -29,7 +29,10 @@ import app.anish.com.tapp.adapters.add_contact.builder.FacebookContactListViewIt
 import app.anish.com.tapp.adapters.add_contact.builder.LinkedInContactListViewItemFactory;
 import app.anish.com.tapp.adapters.add_contact.builder.PhoneContactListViewItemFactory;
 import app.anish.com.tapp.adapters.ListViewItem;
+import app.anish.com.tapp.shared_prefs.SettingsInfo;
+import app.anish.com.tapp.shared_prefs.SharePrefKeyInfo;
 import app.anish.com.tapp.shared_prefs.TappSharedPreferences;
+import app.anish.com.tapp.utils.JSONUtils;
 
 /**
  * Interface for processing Camera Data through
@@ -142,16 +145,18 @@ public class CameraScanProcessor {
 
     private void showAddContactDialog(JSONObject jsonObject) {
         View dialogView = getAddContactDialogView(jsonObject);
-        AlertDialog dialog = createAddContactDialog(dialogView);
+        AlertDialog dialog = createAddContactDialog(dialogView, jsonObject);
         setupOnDismissListenerForDialog(dialog);
         dialog.show();
     }
 
-    private AlertDialog createAddContactDialog(View dialogView) {
+    private AlertDialog createAddContactDialog(View dialogView, JSONObject qrJSON) {
         AlertDialog.Builder dialogBuilder = new AlertDialog.Builder(mContext);
+        String contactName = JSONUtils.getString(qrJSON, SettingsInfo.OWNER_NAME.getInfoPrefKey());
+        String dialogTitle = contactName == null ? "Connect" : "Connect with " + contactName;
         dialogBuilder
                 .setView(dialogView)
-                .setTitle(R.string.add_contact_dialog_title)
+                .setTitle(dialogTitle)
                 .setPositiveButton(R.string.dialog_done, new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialogInterface, int i) {
