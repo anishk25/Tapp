@@ -43,6 +43,8 @@ dependencies {
     compile 'com.squareup.retrofit2:retrofit:2.3.0'
     compile 'com.squareup.retrofit2:converter-gson:2.1.0'
     compile 'com.google.guava:guava:23.0-android'
+    compile "org.projectlombok:lombok:1.16.18"
+
 
     testCompile 'junit:junit:4.12'
     compile files('libs/zbar.jar')
