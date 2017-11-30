@@ -27,7 +27,7 @@ public class PeopleMetSQLiteHelper extends SQLiteOpenHelper {
 
     private static final String DATABASE_CREATE =
             String.format("create table %s ( %s text not null, %s text " +
-                    "primary key, %s text, %s text , %s text, %s text",
+                    "primary key, %s text, %s text , %s text, %s text )",
                     TABLE_PEOPLE_MET_INFO, COLUMN_NAME, COLUMN_PHONE_NUMBER,
                     COLUMN_EMAIL, COLUMN_DATE_MET, COLUMN_FACEBOOK_ID, COLUMN_LINKEDIN_ID);
 

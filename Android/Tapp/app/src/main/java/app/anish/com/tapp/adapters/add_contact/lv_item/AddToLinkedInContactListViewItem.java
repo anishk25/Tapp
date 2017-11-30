@@ -14,6 +14,7 @@ import android.widget.TextView;
 
 import app.anish.com.tapp.R;
 import app.anish.com.tapp.adapters.ListViewItem;
+import app.anish.com.tapp.database.PeopleMetEngine;
 import app.anish.com.tapp.utils.PackageUtils;
 
 /**
@@ -68,6 +69,7 @@ public class AddToLinkedInContactListViewItem implements ListViewItem {
         } else {
             userProfileIntent = new Intent(Intent.ACTION_VIEW, Uri.parse("http://www.linkedin.com/profile/view?id=" + linkedInId));
         }
+        PeopleMetEngine.saveScannedPerson();
         context.startActivity(userProfileIntent);
     }
 }

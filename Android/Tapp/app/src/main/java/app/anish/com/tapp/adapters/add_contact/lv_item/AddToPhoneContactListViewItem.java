@@ -24,6 +24,8 @@ import java.util.Map;
 
 import app.anish.com.tapp.R;
 import app.anish.com.tapp.adapters.ListViewItem;
+import app.anish.com.tapp.database.PeopleMetDao;
+import app.anish.com.tapp.database.PeopleMetEngine;
 import app.anish.com.tapp.shared_prefs.SettingsInfo;
 import app.anish.com.tapp.utils.ContactInfo;
 
@@ -97,6 +99,7 @@ public class AddToPhoneContactListViewItem implements ListViewItem {
             context.getContentResolver().applyBatch(ContactsContract.AUTHORITY, operations);
             String mainMsg = isUpdate ? "updated" : "added";
             Toast.makeText(context, "Successfully " + mainMsg + " contact from QR code", Toast.LENGTH_LONG).show();
+            PeopleMetEngine.saveScannedPerson();
         } catch (Exception e) {
             String mainMsg = isUpdate ? "updating" : "adding";
             String msg = "Error " + mainMsg + " contact from QR code";

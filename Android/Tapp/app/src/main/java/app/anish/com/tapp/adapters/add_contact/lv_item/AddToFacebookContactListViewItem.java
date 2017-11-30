@@ -13,6 +13,7 @@ import android.widget.TextView;
 
 import app.anish.com.tapp.R;
 import app.anish.com.tapp.adapters.ListViewItem;
+import app.anish.com.tapp.database.PeopleMetEngine;
 import app.anish.com.tapp.utils.PackageUtils;
 
 /**
@@ -73,6 +74,9 @@ public class AddToFacebookContactListViewItem implements ListViewItem {
             // show user profile through browser
             userProfileIntent = new Intent(Intent.ACTION_VIEW, Uri.parse("https://facebook.com/" + facebookId));
         }
+
+        // assuming that the person will actually add the person to facebook
+        PeopleMetEngine.saveScannedPerson();
         context.startActivity(userProfileIntent);
     }
 }

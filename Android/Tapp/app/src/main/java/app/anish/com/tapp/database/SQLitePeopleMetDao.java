@@ -43,6 +43,7 @@ public class SQLitePeopleMetDao implements PeopleMetDao{
         try {
             ContentValues contentValues = personToContentValues(personMet);
             database.insert(PeopleMetSQLiteHelper.TABLE_PEOPLE_MET_INFO, null, contentValues);
+            Log.i(LOG_TAG, "successfully saved " + personMet + " to database");
         } finally {
             database.close();
         }
@@ -69,8 +70,11 @@ public class SQLitePeopleMetDao implements PeopleMetDao{
                     PeopleMetSQLiteHelper.COLUMN_DATE_MET + " ASC");
 
             while(!cursor.isAfterLast()) {
-                PersonMet personMet = cursorToPersonMet(cursor);
-                peopleMet.add(personMet);
+                // skip first cursor because it contains the column names
+                if (cursor.isFirst())  {
+                    PersonMet personMet = cursorToPersonMet(cursor);
+                    peopleMet.add(personMet);
+                }
                 cursor.moveToNext();
             }
         } catch (Exception e) {

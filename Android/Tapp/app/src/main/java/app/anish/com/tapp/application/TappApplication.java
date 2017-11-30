@@ -2,6 +2,8 @@ package app.anish.com.tapp.application;
 
 import android.app.Application;
 
+import app.anish.com.tapp.database.PeopleMetDaoHolder;
+import app.anish.com.tapp.database.PeopleMetEngine;
 import app.anish.com.tapp.shared_prefs.TappSharedPreferences;
 
 /**
@@ -15,5 +17,8 @@ public class TappApplication extends Application {
         super.onCreate();
         // initialize shared preferences at start of activity
         TappSharedPreferences.init(getApplicationContext());
+
+        // initialize people met database
+        PeopleMetDaoHolder.createDaoInstance(getApplicationContext());
     }
 }
