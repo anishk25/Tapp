@@ -1,5 +1,7 @@
 package app.anish.com.tapp.database;
 
+import android.graphics.Bitmap;
+
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -22,24 +24,27 @@ public class PersonMet {
     private final Date dateMet;
     private final String facebookId;
     private final String linkedInId;
+    private final Bitmap personImage;
 
-    public PersonMet(String name, String phoneNumber, String email, Date dateMet, String facebookId, String linkedInId) {
+    public PersonMet(String name, String phoneNumber, String email, Date dateMet, String facebookId, String linkedInId, Bitmap personImage) {
         this.name = name;
         this.phoneNumber = phoneNumber;
         this.email = email;
         this.dateMet = dateMet;
         this.facebookId = facebookId;
         this.linkedInId = linkedInId;
+        this.personImage = personImage;
     }
 
-    public static PersonMet convJSONToPersonMet(JSONObject jsonObject) throws JSONException{
+    public static PersonMet getPersonMetFromScan(JSONObject jsonObject) throws JSONException{
         String name = getJSONString(jsonObject, SettingsInfo.OWNER_NAME.getInfoPrefKey());
         String phone = getJSONString(jsonObject, SettingsInfo.PHONE_NUMBER.getInfoPrefKey());
         String email = getJSONString(jsonObject, SettingsInfo.EMAIL.getInfoPrefKey());
         String facebookId = getJSONString(jsonObject, SecuredSharedPrefs.FACEBOOK_ID.getInfoPrefKey());
-        String linkedinId = getJSONString(jsonObject, SecuredSharedPrefs.LINKEDIN_ID.getInfoPrefKey());
+        String linkedInId = getJSONString(jsonObject, SecuredSharedPrefs.LINKEDIN_ID.getInfoPrefKey());
         Date date = new Date();
-        return new PersonMet(name, phone, email, date, facebookId, linkedinId);
+        // TODO: retrieve image bitmap if linkedIn Id or facebookId is present
+        return new PersonMet(name, phone, email, date, facebookId, linkedInId, null);
     }
 
     public String getName() {

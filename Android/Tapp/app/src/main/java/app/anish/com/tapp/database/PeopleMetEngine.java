@@ -17,7 +17,7 @@ public class PeopleMetEngine {
 
 
     public static void initScannedPerson(JSONObject jsonObject) throws JSONException {
-        scannedPerson = PersonMet.convJSONToPersonMet(jsonObject);
+        scannedPerson = PersonMet.getPersonMetFromScan(jsonObject);
     }
 
     public static void saveScannedPerson() {

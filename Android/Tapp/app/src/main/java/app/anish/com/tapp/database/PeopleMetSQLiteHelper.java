@@ -19,6 +19,7 @@ public class PeopleMetSQLiteHelper extends SQLiteOpenHelper {
     public static final String COLUMN_DATE_MET = "date_met";
     public static final String COLUMN_FACEBOOK_ID = "facebook_id";
     public static final String COLUMN_LINKEDIN_ID = "linkedin_id";
+    public static final String COLUMN_PERSON_IMAGE = "profile_image";
 
     // Database Details
     private static final String DATABASE_NAME = "people_met.db";
@@ -27,9 +28,10 @@ public class PeopleMetSQLiteHelper extends SQLiteOpenHelper {
 
     private static final String DATABASE_CREATE =
             String.format("create table %s ( %s text not null, %s text " +
-                    "primary key, %s text, %s text , %s text, %s text )",
+                    "primary key, %s text, %s text , %s text, %s text, %s blob)",
                     TABLE_PEOPLE_MET_INFO, COLUMN_NAME, COLUMN_PHONE_NUMBER,
-                    COLUMN_EMAIL, COLUMN_DATE_MET, COLUMN_FACEBOOK_ID, COLUMN_LINKEDIN_ID);
+                    COLUMN_EMAIL, COLUMN_DATE_MET, COLUMN_FACEBOOK_ID,
+                    COLUMN_LINKEDIN_ID, COLUMN_PERSON_IMAGE);
 
 
     public PeopleMetSQLiteHelper(Context context) {

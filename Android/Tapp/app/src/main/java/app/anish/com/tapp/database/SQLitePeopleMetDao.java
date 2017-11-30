@@ -4,11 +4,14 @@ import android.content.ContentValues;
 import android.content.Context;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.util.Log;
 
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 
 /**
@@ -29,7 +32,8 @@ public class SQLitePeopleMetDao implements PeopleMetDao{
             PeopleMetSQLiteHelper.COLUMN_EMAIL,
             PeopleMetSQLiteHelper.COLUMN_DATE_MET,
             PeopleMetSQLiteHelper.COLUMN_FACEBOOK_ID,
-            PeopleMetSQLiteHelper.COLUMN_LINKEDIN_ID
+            PeopleMetSQLiteHelper.COLUMN_LINKEDIN_ID,
+            PeopleMetSQLiteHelper.COLUMN_PERSON_IMAGE
     };
 
     public SQLitePeopleMetDao(Context context) {
@@ -97,13 +101,16 @@ public class SQLitePeopleMetDao implements PeopleMetDao{
     }
 
     private PersonMet cursorToPersonMet(Cursor cursor) throws ParseException {
-        return new PersonMet(
-                cursor.getString(0),
-                cursor.getString(1),
-                cursor.getString(2),
-                DATE_FORMAT.parse(cursor.getString(3)),
-                cursor.getString(4),
-                cursor.getString(5)
-        );
+        String name = cursor.getString(0);
+        String phoneNumber = cursor.getString(1);
+        String email = cursor.getString(2);
+        Date dateMet = DATE_FORMAT.parse(cursor.getString(3));
+        String facebookId = cursor.getString(4);
+        String linkedIn = cursor.getString(5);
+
+        //parse blob
+        byte [] imgBytArr = cursor.getBlob(6);
+        Bitmap bitmap = imgBytArr == null ? null : BitmapFactory.decodeByteArray(imgBytArr, 0, imgBytArr.length);
+        return new PersonMet(name,phoneNumber,email, dateMet, facebookId, linkedIn, bitmap);
     }
 }
