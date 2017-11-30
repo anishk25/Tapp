@@ -16,8 +16,6 @@ import java.util.List;
  */
 
 public class SQLitePeopleMetDao implements PeopleMetDao{
-
-
     private static final String LOG_TAG = SQLitePeopleMetDao.class.getSimpleName();
 
 
@@ -67,8 +65,9 @@ public class SQLitePeopleMetDao implements PeopleMetDao{
         SQLiteDatabase database = dbHelper.getWritableDatabase();
         List<PersonMet> peopleMet = new ArrayList<>();
         try {
-            // TODO default order this by date
-            Cursor cursor = database.query(PeopleMetSQLiteHelper.TABLE_PEOPLE_MET_INFO, ALL_COLUMNS, null, null, null, null, null);
+            Cursor cursor = database.query(PeopleMetSQLiteHelper.TABLE_PEOPLE_MET_INFO, ALL_COLUMNS, null, null, null, null,
+                    PeopleMetSQLiteHelper.COLUMN_DATE_MET + " ASC");
+
             while(!cursor.isAfterLast()) {
                 PersonMet personMet = cursorToPersonMet(cursor);
                 peopleMet.add(personMet);
